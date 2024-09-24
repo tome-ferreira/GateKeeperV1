@@ -13,7 +13,7 @@ namespace GateKeeperV1.Data
         }
 
         public DbSet<Plan> Plans { get; set; }
-        public DbSet<Company> Projects { get; set; }
+        public DbSet<Company> Companies { get; set; }
         public DbSet<CompanyAdmins> CompanyAdmins { get; set; }
         public DbSet<CompanySupervisors> CompanySupervisors { get; set; }
         public DbSet<CompanyManagers> CompanyManagers { get; set; }

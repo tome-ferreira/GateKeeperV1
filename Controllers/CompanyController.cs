@@ -43,13 +43,13 @@ namespace GateKeeperV1.Controllers
 
 
 
-        //View to create a project
+        //View to regist a company
         [HttpGet]
         public IActionResult RegistCompany()
         {
             return View();
         }
-        //After recibing the project info, redirect to checkout
+        //After recibing the company info, redirect to checkout
         [HttpPost]
         public IActionResult RegistCompany(RegistCompanyViewModel model)
         {
@@ -57,29 +57,58 @@ namespace GateKeeperV1.Controllers
             {
                 if(model.Plan == "Enterprise")
                 {
-                    return RedirectToAction("CostumizePlan", "Project", new { model = model });
+                    return RedirectToAction("CostumizePlan", "Company", new { model = model });
                 }
                 if(model.Plan == "Free")
                 {
+                    // Generate a random salt
+                    byte[] salt = GenerateSalt();
 
+                    // Hash the password with the salt
+                    byte[] hashedPassword = HashPassword(model.Password, salt);
+
+                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(1000));
+
+                    return RedirectToAction("CompanyReady", "Company", new { model = model });
                 }
 
-                return RedirectToAction("Checkout", "Project", new {model = model});
+                return RedirectToAction("Checkout", "Company", new {model = model});
             }
 
             return View(model);
         }
-        //Checkout recibes the info from the StartProject and opens the view
+        //Checkout recibes the info from the RegistCompany and opens the view
         [HttpGet]
         public IActionResult Checkout(RegistCompanyViewModel model) 
         {
             if(ModelState.IsValid)
             {
+                CheckoutViewModel outgoingModel = new CheckoutViewModel(model);
+
                 return View(model);
             }
             return View("Error");
         }
-        //Page to confrim that the project was created
+        //Action to create company after checkout
+        public async Task<IActionResult> CreateCompany(CheckoutViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Generate a random salt
+                byte[] salt = GenerateSalt();
+
+                // Hash the password with the salt
+                byte[] hashedPassword = HashPassword(model.company.Password, salt);
+
+                Company company = new Company(model.company.Name, model.company.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), model.validUntil);
+
+                return RedirectToAction("CompanyReady", "Company", new { model = model });
+            }
+            return View("Error");
+        }
+
+
+        //Page to confrim that the company was registed
         [HttpGet]
         public IActionResult CompanyReady()
         {
