@@ -1,0 +1,70 @@
+﻿@model IEnumerable<ApplicationUser>
+
+@{
+    ViewBag.Title = "Application users";
+}
+
+<div class="container">
+    <h1>Application users</h1>
+
+    <a class="btn btn-primary" asp-action="Register" asp-controller="Account">Create new user</a>
+
+    @if (Model.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>
+                        Email
+                    </td>
+                    <td>
+                        Name
+                    </td>
+                    <td>
+                        Active projects
+                    </td>
+                    <td>
+                        Active requests
+                    </td>
+                    <td>
+
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var user in Model)
+                {
+                    <tr>
+                        <td>
+                            @user.UserName
+                        </td>
+                        <td>
+                            @user.Name @user.Surname
+                        </td>
+                        <td>
+                            #
+                        </td>
+                        <td>
+                            #
+                        </td>
+                        <td>
+                            <a asp-action="EditUser" asp-controller="Administration" asp-route-id="@user.Id" class="btn btn-primary">Edit</a>
+                        </td>
+                        <td>
+                            <form method="post" asp-action="DeleteUser" asp-controller="Administration" asp-route-id="@user.Id">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <h4>No users created yet</h4>
+    }
+</div>

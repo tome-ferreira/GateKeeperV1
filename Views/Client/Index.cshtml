@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Company>
+@{
+    ViewBag.Title = "Your companies";
+}
+
+<div class="container">
+    <h1>CLIENT</h1>
+
+    @if (Model == null)
+    {
+        <div class="row text-center">
+            <h3>Looks like you are not part of any company yet. Please wait to be added to one or regist your own right now.</h3>
+            <a class="btn btn-primary" asp-action="RegistCompany" asp-controller="Company">Regist a new company</a>
+        </div>
+    }
+    else
+    {
+        foreach(var p in Model)
+        {
+            <p>stuff</p>
+        }
+    }
+</div>
