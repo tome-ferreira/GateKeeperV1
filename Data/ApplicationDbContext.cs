@@ -38,7 +38,7 @@ namespace GateKeeperV1.Data
 
 
 
-            //Project roles
+            //Project role Admin (Many to many)
             modelBuilder.Entity<CompanyAdmins>()
                .HasKey(pu => new { pu.UserId, pu.CompanyId });
 
@@ -54,7 +54,7 @@ namespace GateKeeperV1.Data
 
 
 
-
+            //Project role Manager (Many to many)
             modelBuilder.Entity<CompanyManagers>()
                .HasKey(pu => new { pu.UserId, pu.CompanyId });
 
@@ -69,7 +69,7 @@ namespace GateKeeperV1.Data
                 .HasForeignKey(pu => pu.CompanyId);
 
 
-
+            //Project role Supervisor (Many to many)
             modelBuilder.Entity<CompanySupervisors>()
                 .HasKey(pu => new { pu.UserId, pu.CompanyId });
 
@@ -84,7 +84,7 @@ namespace GateKeeperV1.Data
                 .HasForeignKey(pu => pu.CompanyId);
 
 
-
+            //Project role Worker (Many to many)
             modelBuilder.Entity<CompanyWorkers>()
                 .HasKey(pu => new { pu.UserId, pu.CompanyId });
 
@@ -97,6 +97,14 @@ namespace GateKeeperV1.Data
                 .HasOne(pu => pu.Company)
                 .WithMany(p => p.CompanyWorkers)
                 .HasForeignKey(pu => pu.CompanyId);
+
+
+
+            //Company plan (One to many)
+            modelBuilder.Entity<Plan>()
+                .HasMany(c => c.Companies)
+                .WithOne(p => p.Plan)
+                .HasForeignKey(p => p.PlanId);
         }
     }
 }

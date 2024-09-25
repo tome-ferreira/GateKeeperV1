@@ -6,6 +6,8 @@ using GateKeeperV1.Data;
 using GateKeeperV1.Models;
 using GateKeeperV1.Services;
 using GateKeeperV1.ViewModels;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GateKeeperV1.Controllers
 {
@@ -51,56 +53,79 @@ namespace GateKeeperV1.Controllers
         }
         //After recibing the company info, redirect to checkout
         [HttpPost]
-        public IActionResult RegistCompany(RegistCompanyViewModel model)
+        public async Task<IActionResult> RegistCompany(RegistCompanyViewModel model)
         {
             if(ModelState.IsValid)
             {
+                //If the emterprise paln is slected go costumize the plan 
                 if(model.Plan == "Enterprise")
                 {
                     return RedirectToAction("CostumizePlan", "Company", new { model = model });
                 }
+                //If the plan is free create company directly and continue
                 if(model.Plan == "Free")
                 {
+                    Guid planId = await dbContext.Plans.Where(p => p.Name == "Free").Select(p  => p.Id).FirstOrDefaultAsync();
+
                     // Generate a random salt
                     byte[] salt = GenerateSalt();
 
                     // Hash the password with the salt
                     byte[] hashedPassword = HashPassword(model.Password, salt);
 
-                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(1000));
+                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(1000), planId);
+
+                    await dbContext.Companies.AddAsync(company);
+                    
+                    await dbContext.SaveChangesAsync();
 
                     return RedirectToAction("CompanyReady", "Company", new { model = model });
                 }
+                //If the plan is premium proced to checkout
+                // Store the model in TempData as a JSON string
+                TempData["RegistCompanyModel"] = JsonConvert.SerializeObject(model);
 
-                return RedirectToAction("Checkout", "Company", new {model = model});
+                return RedirectToAction("Checkout", "Company");
             }
 
             return View(model);
         }
         //Checkout recibes the info from the RegistCompany and opens the view
         [HttpGet]
-        public IActionResult Checkout(RegistCompanyViewModel model) 
+        public IActionResult Checkout()
         {
-            if(ModelState.IsValid)
+            // Retrieve and deserialize the model from TempData
+            if (TempData["RegistCompanyModel"] != null)
             {
+                var model = JsonConvert.DeserializeObject<RegistCompanyViewModel>(TempData["RegistCompanyModel"].ToString());
+
                 CheckoutViewModel outgoingModel = new CheckoutViewModel(model);
 
-                return View(model);
+                return View(outgoingModel);
             }
+
             return View("Error");
         }
+
         //Action to create company after checkout
+        [HttpPost]
         public async Task<IActionResult> CreateCompany(CheckoutViewModel model)
         {
             if (ModelState.IsValid)
             {
+                Guid planId = await dbContext.Plans.Where(p => p.Name == "Premium").Select(p => p.Id).FirstOrDefaultAsync();
+
                 // Generate a random salt
                 byte[] salt = GenerateSalt();
 
                 // Hash the password with the salt
                 byte[] hashedPassword = HashPassword(model.company.Password, salt);
 
-                Company company = new Company(model.company.Name, model.company.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), model.validUntil);
+                Company company = new Company(model.company.Name, model.company.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), model.validUntil, planId);
+
+                await dbContext.Companies.AddAsync(company);
+
+                await dbContext.SaveChangesAsync();
 
                 return RedirectToAction("CompanyReady", "Company", new { model = model });
             }

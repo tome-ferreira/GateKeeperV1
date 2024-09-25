@@ -14,6 +14,9 @@
         public decimal AnualPrice { get; set; }
         public bool CanBeDeleted { get; set; }
 
+        //Navigation property
+        public ICollection<Company> Companies { get; set; } 
+
         // Constructor
         public Plan(string name, int buildingsN, int registsPerMonth, int workers, int dashboardAccounts, bool hasExcel, decimal monthlyPrice, decimal anualPrice)
         {

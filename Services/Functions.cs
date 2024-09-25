@@ -36,7 +36,7 @@ namespace GateKeeperV1.Services
                 .ToList();
 
             // Fetch the distinct projects from the database
-            var allProjects = await dbContext.Projects
+            var allProjects = await dbContext.Companies
                 .Where(p => allCompanysIds.Contains(p.Id))
                 .ToListAsync();
 

@@ -36,6 +36,14 @@ namespace GateKeeperV1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePlan(CreatePlanViewModel model)
         {
+            // Check if a plan with the same name already exists
+            bool planExists = await dbContext.Plans.AnyAsync(p => p.Name == model.Name);
+
+            if (planExists)
+            {
+                ModelState.AddModelError("Name", "A plan with this name already exists. Please choose a different name.");
+            }
+
             if (ModelState.IsValid)
             {
                 if(model.buildingsNUnlimited == true)
