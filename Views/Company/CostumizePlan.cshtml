@@ -1,0 +1,105 @@
+﻿@model EnterpriseRequestViewModel   
+@{
+    ViewBag.Title = "Costumize plan";
+}
+
+<div class="container">
+    <h1>Create new plan</h1>
+    <!-- Horizontal Form -->
+    <form mmethod="post" asp-action="CostumizePlan" asp-controller="Company" class="mt-5">
+
+
+        <div class="row mb-3">
+            <label asp-for="BuildingsN" class="control-label">Buildings</label>
+            <div class="col-sm-10">
+                <input asp-for="BuildingsN" class="form-control" type="number" id="CS" />
+                <span asp-validation-for="BuildingsN" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <input asp-for="BuildingsNUnlimited" type="checkbox" id="CSU" />
+                <label asp-for="BuildingsNUnlimited">Unlimited</label>
+            </div>
+            <script>
+                document.getElementById('CSU').addEventListener('change', function () {
+                    document.getElementById('CS').disabled = this.checked;
+                });
+            </script>
+        </div>
+
+        <div class="row mb-3">
+            <label asp-for="RegistsPerMonth" class="control-label">Regists per month</label>
+            <div class="col-sm-10">
+                <input asp-for="RegistsPerMonth" class="form-control" type="number" id="RPM" />
+                <span asp-validation-for="RegistsPerMonth" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <input asp-for="RegistsPerMonthUnlimited" type="checkbox" id="RPMU" />
+                <label asp-for="RegistsPerMonthUnlimited">Unlimited</label>
+                <script>
+                    document.getElementById('RPMU').addEventListener('change', function () {
+                        document.getElementById('RPM').disabled = this.checked;
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label asp-for="Workers" class="control-label"></label>
+            <div class="col-sm-10">
+                <input asp-for="Workers" class="form-control" type="number" id="W" />
+                <span asp-validation-for="Workers" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <input asp-for="WorkersUnlimited" type="checkbox" id="WU" />
+                <label asp-for="WorkersUnlimited">Unlimited</label>
+                <script>
+                    document.getElementById('WU').addEventListener('change', function () {
+                        document.getElementById('W').disabled = this.checked;
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label asp-for="DashboardAccounts" class="control-label">Dashboard accounts</label>
+            <div class="col-md-10">
+                <input asp-for="DashboardAccounts" class="form-control" type="number" id="DA" />
+                <span asp-validation-for="DashboardAccounts" class="text-danger"></span>
+            </div>
+            <div class="col-md-2">
+                <input asp-for="DashboardAccountsUnlimited" type="checkbox" id="DAU" />
+                <label asp-for="DashboardAccountsUnlimited">Unlimited</label>
+                <script>
+                    document.getElementById('DAU').addEventListener('change', function () {
+                        document.getElementById('DA').disabled = this.checked;
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-12">
+                <div class="form-check">
+                    <input asp-for="HasExcel" class="form-check-input" style="width: 20px; height: 20px;" />
+                    <label class="form-check-label" for="HasExcel">
+                        Has Excel access
+                    </label>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+        </div>
+    </form><!-- End Horizontal Form -->
+
+
+
+
+
+
+</div>

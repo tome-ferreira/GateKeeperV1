@@ -60,7 +60,8 @@ namespace GateKeeperV1.Controllers
                 //If the emterprise paln is slected go costumize the plan 
                 if(model.Plan == "Enterprise")
                 {
-                    return RedirectToAction("CostumizePlan", "Company", new { model = model });
+                    TempData["RegistCompanyModel"] = JsonConvert.SerializeObject(model);
+                    return RedirectToAction("CostumizePlan", "Company");
                 }
                 //If the plan is free create company directly and continue
                 if(model.Plan == "Free")
@@ -73,7 +74,7 @@ namespace GateKeeperV1.Controllers
                     // Hash the password with the salt
                     byte[] hashedPassword = HashPassword(model.Password, salt);
 
-                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(1000), planId);
+                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(9999), planId);
 
                     await dbContext.Companies.AddAsync(company);
                     
@@ -143,7 +144,27 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public IActionResult CostumizePlan()
         {
-            return View();
+
+            // Retrieve and deserialize the model from TempData
+            if (TempData["RegistCompanyModel"] != null)
+            {
+                var model = JsonConvert.DeserializeObject<RegistCompanyViewModel>(TempData["RegistCompanyModel"].ToString());
+
+                EnterpriseRequestViewModel outgoingModel = new EnterpriseRequestViewModel(model);
+
+                return View(outgoingModel);
+            }
+
+            return View("Error");
+        }
+        [HttpPost]
+        public async Task<IActionResult> CostumizePlan(EnterpriseRequestViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+            }
+            return View("Erro");
         }
     }
 }

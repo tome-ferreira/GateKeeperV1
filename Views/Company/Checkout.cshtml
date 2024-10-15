@@ -4,14 +4,14 @@
     ViewBag.Title = "Checkout";
 }
 
-<div class="containner">
+<div class="container">
     <h1>Temporary checkout placeholder</h1>
 
     <p>This is a temporary placeholder until the paying system is created. For now, please select until when this company should be valid and click continue</p>
 
     <form asp-action="CreateCompany" class="form-control">
 
-        <input type="datetime" asp-for="validUntil" class="form-control" />
+        <input type="date" asp-for="validUntil" class="form-control" />
 
         <button type="submit" class="btn btn-primary">Continue</button>
     </form>
