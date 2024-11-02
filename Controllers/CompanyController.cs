@@ -8,6 +8,9 @@ using GateKeeperV1.Services;
 using GateKeeperV1.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Identity;
+using System.Numerics;
+using Microsoft.AspNetCore.Hosting;
 
 namespace GateKeeperV1.Controllers
 {
@@ -16,11 +19,15 @@ namespace GateKeeperV1.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IFunctions functions;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public CompanyController(ApplicationDbContext dbContext, IFunctions functions)
+        public CompanyController(ApplicationDbContext dbContext, IFunctions functions, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment)
         {
             this.dbContext = dbContext;
             this.functions = functions;
+            this.userManager = userManager;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         // Method to generate a random salt
@@ -43,6 +50,23 @@ namespace GateKeeperV1.Controllers
             }
         }
 
+        private async Task<WorkerProfile> CreateAdminProfile()
+        {
+            var user = await userManager.GetUserAsync(User);
+            var userEmail = user.Email;
+            var userId = user.Id;
+
+            var company = JsonConvert.DeserializeObject<Company>(TempData["FreeCompany"].ToString());
+
+            await dbContext.Companies.AddAsync(company);
+
+            int internalNumber = await functions.GenerateInternalNumber(company.Id);
+
+            WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", userEmail);
+
+            return workerProfile;
+        }
+
 
 
         //View to regist a company
@@ -51,95 +75,79 @@ namespace GateKeeperV1.Controllers
         {
             return View();
         }
-        //After recibing the company info, redirect to checkout
+        //Post for creating a company
         [HttpPost]
         public async Task<IActionResult> RegistCompany(RegistCompanyViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                //If the emterprise paln is slected go costumize the plan 
-                if(model.Plan == "Enterprise")
+                if (model.Plan == "Enterprise")
                 {
                     TempData["RegistCompanyModel"] = JsonConvert.SerializeObject(model);
                     return RedirectToAction("CostumizePlan", "Company");
                 }
-                //If the plan is free create company directly and continue
-                if(model.Plan == "Free")
-                {
-                    Guid planId = await dbContext.Plans.Where(p => p.Name == "Free").Select(p  => p.Id).FirstOrDefaultAsync();
 
+
+                if (model.Plan == "Free")
+                {
                     // Generate a random salt
                     byte[] salt = GenerateSalt();
 
                     // Hash the password with the salt
                     byte[] hashedPassword = HashPassword(model.Password, salt);
 
-                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(9999), planId);
-
+                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt),
+                        DateTime.Now.AddYears(99), 1, 500, 5, 1, false, 0.00, 0.00);
                     await dbContext.Companies.AddAsync(company);
-                    
+
+                    var user = await userManager.GetUserAsync(User);
+
+                    int internalNumber = await functions.GenerateInternalNumber(company.Id);
+
+                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", user.Id);
+
+                    await dbContext.WorkerProfiles.AddAsync(workerProfile);
+
                     await dbContext.SaveChangesAsync();
 
-                    return RedirectToAction("CompanyReady", "Company", new { model = model });
+                    return View("CompanyReady", company.Id);
                 }
-                //If the plan is premium proced to checkout
-                // Store the model in TempData as a JSON string
-                TempData["RegistCompanyModel"] = JsonConvert.SerializeObject(model);
+                else if (model.Plan == "Premium")
+                {
 
-                return RedirectToAction("Checkout", "Company");
-            }
+                }
 
-            return View(model);
-        }
-        //Checkout recibes the info from the RegistCompany and opens the view
-        [HttpGet]
-        public IActionResult Checkout()
-        {
-            // Retrieve and deserialize the model from TempData
-            if (TempData["RegistCompanyModel"] != null)
-            {
-                var model = JsonConvert.DeserializeObject<RegistCompanyViewModel>(TempData["RegistCompanyModel"].ToString());
-
-                CheckoutViewModel outgoingModel = new CheckoutViewModel(model);
-
-                return View(outgoingModel);
-            }
-
-            return View("Error");
-        }
-
-        //Action to create company after checkout
-        [HttpPost]
-        public async Task<IActionResult> CreateCompany(CheckoutViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                Guid planId = await dbContext.Plans.Where(p => p.Name == "Premium").Select(p => p.Id).FirstOrDefaultAsync();
-
-                // Generate a random salt
-                byte[] salt = GenerateSalt();
-
-                // Hash the password with the salt
-                byte[] hashedPassword = HashPassword(model.company.Password, salt);
-
-                Company company = new Company(model.company.Name, model.company.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), model.validUntil, planId);
-
-                await dbContext.Companies.AddAsync(company);
-
-                await dbContext.SaveChangesAsync();
-
-                return RedirectToAction("CompanyReady", "Company", new { model = model });
             }
             return View("Error");
         }
 
 
-        //Page to confrim that the company was registed
-        [HttpGet]
-        public IActionResult CompanyReady()
-        {
-            return View();
-        }
+        
+                
+
+                //Save pfp====================================================
+                /*
+                var companyPath = Path.Combine(webHostEnvironment.WebRootPath, "img/pfps", company.Id.ToString());
+                if (!Directory.Exists(companyPath))
+                {
+                    Directory.CreateDirectory(companyPath);
+                }
+                if (profileModel.pfp != null)
+                {
+                    string extension = Path.GetExtension(profileModel.pfp.FileName);
+                    var newFileName = $"{userId}{extension}";
+                    var newFilePath = Path.Combine(companyPath, newFileName);
+                    using (var stream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        profileModel.pfp.CopyTo(stream);
+                    }
+                }*/
+                //============================================================
+
+
+
+
+
         //Page for the user costumise what he needs after selecting the enterprise plan
         [HttpGet]
         public IActionResult CostumizePlan()

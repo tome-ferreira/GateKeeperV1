@@ -22,7 +22,7 @@ namespace GateKeeperV1.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var companies = functions.GetUserCompanys(userId);
+            //var companies = await functions.GetUserCompanys(userId);
 
             return View();
         }

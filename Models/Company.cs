@@ -9,16 +9,17 @@
         public string Salt { get; set; }
         public DateTime ValidUntil { get; set; }
         public DateTime CreationDate { get; set; }
+        public int BuildingsN { get; set; }
+        public int RegistsPerMonth { get; set; }
+        public int WorkersN { get; set; }
+        public int DashboardAccounts { get; set; }
+        public bool HasExcel { get; set; }
+        public double MonthlyPrice { get; set; }
+        public double AnualPrice { get; set; }
 
-        //Foregin Key
-        public Guid PlanId { get; set; }
+        
 
         //Navigation properties
-        public Plan Plan { get; set; }
-        public ICollection<CompanyAdmins> CompanyAdmins { get; set; }
-        public ICollection<CompanyManagers> CompanyManagers { get; set; }
-        public ICollection<CompanySupervisors> CompanySupervisors { get; set; }
-        public ICollection<CompanyWorkers> CompanyWorkers { get; set; }
         public ICollection<WorkerProfile> Workers { get; set; }
         public ICollection<Building> Buildings { get; set; }
         public ICollection<Movement> Movements { get; set; } = new List<Movement>();
@@ -27,7 +28,8 @@
         public ICollection<OffdayVacationRequest> OffdayVacationRequests { get; set; } = new List<OffdayVacationRequest>();
 
         //Bob o construtor
-        public Company(string name, string description, string password, string salt, DateTime validUntil, Guid planId)
+        public Company(string name, string description, string password, string salt, DateTime validUntil, int buildingsN, int registsPerMonth, int workersN,
+            int dashboardAccounts, bool hasExcel, double monthlyPrice, double anualPrice)
         { 
             Name = name;
             Description = description;
@@ -35,7 +37,13 @@
             Salt = salt;
             ValidUntil = validUntil;
             CreationDate = DateTime.Now;
-            PlanId = planId;
+            BuildingsN = buildingsN;
+            RegistsPerMonth = registsPerMonth;
+            WorkersN = workersN;
+            DashboardAccounts = dashboardAccounts;
+            HasExcel = hasExcel;
+            MonthlyPrice = monthlyPrice;
+            AnualPrice = anualPrice;
         }
     }
 }

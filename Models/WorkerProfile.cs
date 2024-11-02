@@ -1,12 +1,13 @@
-﻿namespace GateKeeperV1.Models
+﻿using GateKeeperV1.ViewModels;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+
+namespace GateKeeperV1.Models
 {
     public class WorkerProfile
     {
         public Guid Id { get; set; }
         public int InternalNumber { get; set; }
         public Guid CompanyId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public string Role { get; set; } = string.Empty;
 
@@ -21,5 +22,16 @@
         public ICollection<WorkerShift> WorkerShifts { get; set; } = new List<WorkerShift>();
         public ICollection<AbsenceJustification> AbsenceJustifications { get; set; } = new List<AbsenceJustification>();
         public ICollection<OffdayVacationRequest> OffdayVacationRequests { get; set; } = new List<OffdayVacationRequest>();
+
+
+        public WorkerProfile() { }
+
+        public WorkerProfile(int internalNumber, Guid companyId, string role, string id)
+        {
+            InternalNumber = internalNumber;
+            CompanyId = companyId;
+            Role = role;
+            ApplicationUserId = id;
+        }
     }
 }

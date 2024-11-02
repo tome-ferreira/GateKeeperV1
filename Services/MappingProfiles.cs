@@ -8,7 +8,7 @@ namespace GateKeeperV1.Services
     {
         public MappingProfiles()
         {
-            CreateMap<CreatePlanViewModel, Plan>();
+            //CreateMap<CreatePlanViewModel, Plan>();
         }
     }
 }

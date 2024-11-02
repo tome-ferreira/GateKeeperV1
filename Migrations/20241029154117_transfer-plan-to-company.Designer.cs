@@ -4,6 +4,7 @@ using GateKeeperV1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GateKeeperV1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241029154117_transfer-plan-to-company")]
+    partial class transferplantocompany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,8 +159,8 @@ namespace GateKeeperV1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AnualPrice")
-                        .HasColumnType("float");
+                    b.Property<decimal>("AnualPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("BuildingsN")
                         .HasColumnType("int");
@@ -175,8 +178,8 @@ namespace GateKeeperV1.Migrations
                     b.Property<bool>("HasExcel")
                         .HasColumnType("bit");
 
-                    b.Property<double>("MonthlyPrice")
-                        .HasColumnType("float");
+                    b.Property<decimal>("MonthlyPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -202,6 +205,66 @@ namespace GateKeeperV1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyAdmins", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("CompanyAdmins");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyManagers", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("CompanyManagers");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanySupervisors", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("CompanySupervisors");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyWorkers", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("ComapnyWorkers");
                 });
 
             modelBuilder.Entity("GateKeeperV1.Models.EnterpirseRequest", b =>
@@ -408,6 +471,10 @@ namespace GateKeeperV1.Migrations
                     b.Property<int>("InternalNumber")
                         .HasColumnType("int");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -415,9 +482,14 @@ namespace GateKeeperV1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique();
 
                     b.HasIndex("CompanyId");
 
@@ -606,6 +678,82 @@ namespace GateKeeperV1.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyAdmins", b =>
+                {
+                    b.HasOne("GateKeeperV1.Models.Company", "Company")
+                        .WithMany("CompanyAdmins")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GateKeeperV1.Models.ApplicationUser", "User")
+                        .WithMany("CompanyAdmins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyManagers", b =>
+                {
+                    b.HasOne("GateKeeperV1.Models.Company", "Company")
+                        .WithMany("CompanyManagers")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GateKeeperV1.Models.ApplicationUser", "User")
+                        .WithMany("CompanyManagers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanySupervisors", b =>
+                {
+                    b.HasOne("GateKeeperV1.Models.Company", "Company")
+                        .WithMany("CompanySupervisors")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GateKeeperV1.Models.ApplicationUser", "User")
+                        .WithMany("CompanySupervisors")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.CompanyWorkers", b =>
+                {
+                    b.HasOne("GateKeeperV1.Models.Company", "Company")
+                        .WithMany("CompanyWorkers")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GateKeeperV1.Models.ApplicationUser", "User")
+                        .WithMany("ComapanyWorkers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GateKeeperV1.Models.EnterpirseRequest", b =>
                 {
                     b.HasOne("GateKeeperV1.Models.ApplicationUser", "User")
@@ -695,8 +843,8 @@ namespace GateKeeperV1.Migrations
             modelBuilder.Entity("GateKeeperV1.Models.WorkerProfile", b =>
                 {
                     b.HasOne("GateKeeperV1.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("WorkerProfiles")
-                        .HasForeignKey("ApplicationUserId")
+                        .WithOne("WorkerProfile")
+                        .HasForeignKey("GateKeeperV1.Models.WorkerProfile", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -788,9 +936,18 @@ namespace GateKeeperV1.Migrations
 
             modelBuilder.Entity("GateKeeperV1.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("ComapanyWorkers");
+
+                    b.Navigation("CompanyAdmins");
+
+                    b.Navigation("CompanyManagers");
+
+                    b.Navigation("CompanySupervisors");
+
                     b.Navigation("EnterpirseRequests");
 
-                    b.Navigation("WorkerProfiles");
+                    b.Navigation("WorkerProfile")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GateKeeperV1.Models.Building", b =>
@@ -805,6 +962,14 @@ namespace GateKeeperV1.Migrations
                     b.Navigation("AbsenceJustifications");
 
                     b.Navigation("Buildings");
+
+                    b.Navigation("CompanyAdmins");
+
+                    b.Navigation("CompanyManagers");
+
+                    b.Navigation("CompanySupervisors");
+
+                    b.Navigation("CompanyWorkers");
 
                     b.Navigation("Movements");
 
