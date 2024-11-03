@@ -114,7 +114,27 @@ namespace GateKeeperV1.Controllers
                 }
                 else if (model.Plan == "Premium")
                 {
+                    // Generate a random salt
+                    byte[] salt = GenerateSalt();
 
+                    // Hash the password with the salt
+                    byte[] hashedPassword = HashPassword(model.Password, salt);
+
+                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt),
+                        DateTime.Now.AddYears(99), 3, 1500, 9999999, 3, true, 49.00, 539.00);
+                    await dbContext.Companies.AddAsync(company);
+
+                    var user = await userManager.GetUserAsync(User);
+
+                    int internalNumber = await functions.GenerateInternalNumber(company.Id);
+
+                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", user.Id);
+
+                    await dbContext.WorkerProfiles.AddAsync(workerProfile);
+
+                    await dbContext.SaveChangesAsync();
+
+                    return View("CompanyReady", company.Id);
                 }
 
             }
