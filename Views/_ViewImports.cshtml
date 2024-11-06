@@ -2,5 +2,8 @@
 @using GateKeeperV1.Models
 @using GateKeeperV1.ViewModels
 @using Microsoft.AspNetCore.Identity
+@inject GateKeeperV1.Services.IFunctions functions;
+@inject SignInManager<ApplicationUser> signInManager;
+@inject UserManager<ApplicationUser> userManager;
 
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

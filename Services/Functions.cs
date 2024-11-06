@@ -3,6 +3,8 @@ using GateKeeperV1.Data;
 using GateKeeperV1.Models;
 using System.ComponentModel.Design;
 using Microsoft.AspNetCore.Mvc;
+using GateKeeperV1.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace GateKeeperV1.Services
 {
@@ -10,16 +12,20 @@ namespace GateKeeperV1.Services
     {
         Task<List<Company>> GetUserCompanys(string userdId);
         Task<int> GenerateInternalNumber(Guid CompanyId);
-        Task<bool> IsUserInCompanyRole(string userId, Guid companyId, string role);
+        Task<bool> IsUserInCompanyRole(string userId, string role);
+        Task<bool> IsUserInCompanyRoleView(string userId, string role);
+        Task<CheckForProblemsViewModel> CheckForProblems(Guid CompanyId);
     }
 
     public class Functions : IFunctions
     {
         private readonly ApplicationDbContext dbContext;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public Functions(ApplicationDbContext dbContext)
+        public Functions(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             this.dbContext = dbContext;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -53,11 +59,35 @@ namespace GateKeeperV1.Services
             return maxInternalNumber + 1;
         }
 
-        //Checks if the user is in the company and in the necessary role, logs unauthorized acesses tries
-        public async Task<bool> IsUserInCompanyRole(string userId, Guid companyId, string role)
+
+        //Checks if the user is in the company and in the necessary role. For use in views (does not log)
+        public async Task<bool> IsUserInCompanyRoleView(string userId, string role)
         {
+            string companyId = httpContextAccessor.HttpContext.Session.GetString("companyId") ?? Guid.Empty.ToString();
+
             WorkerProfile? WP = await dbContext.WorkerProfiles.Where(w => w.ApplicationUserId == userId)
-                .Where(w => w.CompanyId ==  companyId).FirstOrDefaultAsync();
+                .Where(w => w.CompanyId.ToString() == companyId).FirstOrDefaultAsync();
+            if (WP != null)
+            {
+                if (WP.Role == role)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        //Checks if the user is in the company and in the necessary role, logs unauthorized acesses tries
+        public async Task<bool> IsUserInCompanyRole(string userId, string role)
+        {
+            string companyId = httpContextAccessor.HttpContext.Session.GetString("companyId") ?? Guid.Empty.ToString();
+
+            WorkerProfile? WP = await dbContext.WorkerProfiles.Where(w => w.ApplicationUserId == userId)
+                .Where(w => w.CompanyId.ToString() ==  companyId).FirstOrDefaultAsync();
             if(WP != null)
             {
                 if(WP.Role == role)
@@ -76,14 +106,25 @@ namespace GateKeeperV1.Services
         }
 
         //Check if project is able to initialize
-        /*public async Task<IActionResult> CheckCompanyRole(Guid CompanyId)
+        public async Task<CheckForProblemsViewModel> CheckForProblems(Guid CompanyId)
         {
-            Company company = await dbContext.Companies.FindAsync(CompanyId);
+            Company company = await dbContext.Companies
+                                      .Include(c => c.Buildings) // Load Buildings collection
+                                      .FirstOrDefaultAsync(c => c.Id == CompanyId);
 
-            if(company == null)
+            if (company == null)
             {
-                return 
+                return new CheckForProblemsViewModel(true, "CompanyNotFound");
             }
-        }*/
+            if(company.ValidUntil < DateTime.Now)
+            {
+                return new CheckForProblemsViewModel(true, "CompanyError"); //Generic name so that workers get an unknow error but administrators know to renovate the license
+            }
+            if(company.Buildings.Count == null || !company.Buildings.Any())
+            {
+                return new CheckForProblemsViewModel(true, "BuildingError");
+            }
+            return new CheckForProblemsViewModel(false, "Ok");
+        }
     }
 }

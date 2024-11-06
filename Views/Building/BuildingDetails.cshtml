@@ -1,0 +1,11 @@
+﻿@model Building
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+<div class="container">
+    <h1>@Model.Name</h1>
+    <p>@Model.Description</p>
+    <a class="btn btn-primary" asp-action="EditBuilding" asp-controller="Building" asp-route-BuildingId="@Model.Id">Edit</a>
+    <a class="btn btn-danger" asp-action="DeleteBuilding" asp-controller="Building" asp-route-BuildingId="@Model.Id">Delete</a>
+</div>

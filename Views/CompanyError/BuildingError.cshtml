@@ -1,0 +1,15 @@
+﻿@{
+    ViewBag.Title = "Building Error";
+    var user = await userManager.GetUserAsync(User);
+}
+<div class="container">
+    @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
+    {
+        <h1>No buildings created yet.</h1>
+        <p>Before you start using our platform, you need to add the first building to your company.</p>
+        <a class="btn btn-primary" asp-action="CreateBuilding" asp-controller="Building">Create now</a>
+    }else{
+        <h1>Ups! The platform is not ready</h1>
+        <p>Looks like your comapny's management team has not finished configuring the platform. Please wait until the platform is ready for use.</p>
+    }
+</div>
