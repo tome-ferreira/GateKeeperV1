@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using Microsoft.AspNetCore.Mvc;
 using GateKeeperV1.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GateKeeperV1.Services
 {
@@ -15,6 +16,7 @@ namespace GateKeeperV1.Services
         Task<bool> IsUserInCompanyRole(string userId, string role);
         Task<bool> IsUserInCompanyRoleView(string userId, string role);
         Task<CheckForProblemsViewModel> CheckForProblems(Guid CompanyId);
+        Task<string> PrintUserRoleView(string WorkerId);
     }
 
     public class Functions : IFunctions
@@ -125,6 +127,19 @@ namespace GateKeeperV1.Services
                 return new CheckForProblemsViewModel(true, "BuildingError");
             }
             return new CheckForProblemsViewModel(false, "Ok");
+        }
+        
+        //Print the user's role in view
+        public async Task<string> PrintUserRoleView(string WorkerId)
+        {
+            string companyId = httpContextAccessor.HttpContext.Session.GetString("companyId") ?? Guid.Empty.ToString();
+            string userRole = await dbContext.WorkerProfiles.Where(w => w.ApplicationUserId == WorkerId.ToString()).Where(w => w.CompanyId.ToString() == companyId)
+                .Select(w => w.Role).FirstOrDefaultAsync();
+            if (userRole.IsNullOrEmpty())
+            {
+                return userRole;
+            }
+            return "";
         }
     }
 }

@@ -27,6 +27,12 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public  async Task<IActionResult> CreateBuilding()
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess){return View("AcessDenied");}
 
@@ -35,16 +41,18 @@ namespace GateKeeperV1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBuilding(CreateBuildingViewModel model)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
             if (ModelState.IsValid)
             {
-                string? companyId = HttpContext.Session.GetString("companyId");
-                if (string.IsNullOrEmpty(companyId))
-                {
-                    return View("Error");
-                }
+
                 Building building = new Building(model.Name, model.Description, Guid.Parse(companyId));
 
                 await dbContext.Buildings.AddAsync(building);
@@ -57,6 +65,12 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public async Task<IActionResult> BuildingDetails(Guid buildingId)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
@@ -72,6 +86,12 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public async Task<IActionResult> EditBuilding (Guid BuildingId)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
@@ -86,6 +106,12 @@ namespace GateKeeperV1.Controllers
         [HttpPost]
         public async Task<IActionResult> EditBuilding(Building building)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
@@ -103,6 +129,12 @@ namespace GateKeeperV1.Controllers
 
         public async Task<IActionResult> DeleteBuilding(Guid BuildingId)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
@@ -121,14 +153,15 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public async Task<IActionResult> ListBuildings()
         {
-            var user = await userManager.GetUserAsync(User);
-            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
-
             string? companyId = HttpContext.Session.GetString("companyId");
             if (string.IsNullOrEmpty(companyId))
             {
-                return View("Error");
+                return RedirectToAction("Index", "Client");
             }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
 
             // Use FirstOrDefaultAsync instead of FindAsync
             var company = await dbContext.Companies.Include(c => c.Buildings).FirstOrDefaultAsync(c => c.Id.ToString() == companyId);

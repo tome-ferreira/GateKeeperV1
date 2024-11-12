@@ -1,0 +1,39 @@
+﻿@model IEnumerable<WorkerProfileWithUserViewModel>
+@{
+    ViewBag.Title = "Workers List";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div class="container">
+    @if(Model != null && Model.Any())
+    {
+        <h2>Worker List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Internal Number</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var worker in Model)
+                {
+                    <tr>
+                        <td>@worker.InternalNumber</td>
+                        <td>@worker.UserFullName</td>
+                        <td>@worker.UserEmail</td>
+                        <td>@worker.Role</td>
+                        <td><a class="btn btn-primary" asp-action="WorkerDetails" asp-controller="Worker" asp-route-workerId="@worker.WorkerProfileId">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No worker added yet.5</p>
+    }
+</div>

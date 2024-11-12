@@ -62,7 +62,7 @@ namespace GateKeeperV1.Controllers
 
             int internalNumber = await functions.GenerateInternalNumber(company.Id);
 
-            WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", userEmail);
+            WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id,"", "Admin", userEmail);
 
             return workerProfile;
         }
@@ -104,7 +104,7 @@ namespace GateKeeperV1.Controllers
 
                     int internalNumber = await functions.GenerateInternalNumber(company.Id);
 
-                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", user.Id);
+                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "", "Admin", user.Id);
 
                     await dbContext.WorkerProfiles.AddAsync(workerProfile);
 
@@ -128,7 +128,7 @@ namespace GateKeeperV1.Controllers
 
                     int internalNumber = await functions.GenerateInternalNumber(company.Id);
 
-                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id, "Admin", user.Id);
+                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id,"", "Admin", user.Id);
 
                     await dbContext.WorkerProfiles.AddAsync(workerProfile);
 

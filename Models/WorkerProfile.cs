@@ -10,12 +10,10 @@ namespace GateKeeperV1.Models
         public Guid CompanyId { get; set; }
         public string? Notes { get; set; }
         public string Role { get; set; } = string.Empty;
-
-        // One-to-one relationship with ApplicationUser
         public string ApplicationUserId { get; set; }    // Foreign key for ApplicationUser
-        public ApplicationUser ApplicationUser { get; set; }  // Navigation property
 
         // Navigation property
+        public ApplicationUser ApplicationUser { get; set; }  // Navigation property
         public Company Company { get; set; }  // Each worker belongs to one company
         public ICollection<Movement> Movements { get; set; } = new List<Movement>();
         // Many-to-many relationship with WorkerShift (join table)
@@ -26,12 +24,13 @@ namespace GateKeeperV1.Models
 
         public WorkerProfile() { }
 
-        public WorkerProfile(int internalNumber, Guid companyId, string role, string id)
+        public WorkerProfile(int internalNumber, Guid companyId, string? notes, string role, string userId)
         {
             InternalNumber = internalNumber;
             CompanyId = companyId;
             Role = role;
-            ApplicationUserId = id;
+            Notes = notes;
+            ApplicationUserId = userId;
         }
     }
 }
