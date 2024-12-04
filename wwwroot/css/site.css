@@ -1,3 +1,26 @@
+/*From style.css ============================*/
+.logo {
+    line-height: 1;
+}
+
+@media (min-width: 1200px) {
+    .logo {
+        width: 280px;
+    }
+}
+
+.logo img {
+    max-height: 56px;
+    margin-right: 6px;
+}
+
+.logo span {
+    font-size: 26px;
+    font-weight: 700;
+    color: #012970;
+    font-family: "Nunito", sans-serif;
+}
+/*===========================================*/
 html {
   font-size: 14px;
 }
@@ -19,4 +42,87 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+.costum-background-login-register {
+    background-color: #023F2D;
+}
+
+.login-register-card {
+    width: 400px;
+    background-color: #FFF;
+    border-radius: 20px;
+    color: #000;
+}
+
+.login-register-logo {
+    max-height: 250px;
+}
+
+.btn-primary {
+    border-radius: 20px;
+    color: #FFF;
+    background-color: #023F2D;
+    border-color: #023F2D;
+}
+    .btn-primary:hover {
+        background-color: #059F73 !important;
+        border-color: #059F73 !important;
+    }
+
+.login-register-links{
+    color: #000;
+}
+    .login-register-links:hover {
+        color: #023F2D;
+    }
+
+.custom-background {
+    background-color: #003d32; 
+    min-height: 100vh; 
+    padding: 15px;
+}
+
+.select-company-img {
+    width: 100%;
+    height: auto; 
+    border-radius: 20px;
+    object-fit: cover; 
+}
+
+.row {
+    gap: 1rem; 
+}
+
+.your-companies-card{
+    border-radius: 20px;
+    background-color: #FFF;
+    width: 100%;
+    box-shadow: 5px;
+}
+
+.border-radius-20{
+    border-radius:20px;
+}
+
+.top-navbar {
+    background-color: #003d32;
+    color: #FFF;
+}
+
+.top-nav-bar-logo{
+    height: 100px;
+}
+
+.sidebar-nav .nav-link {
+    background-color: #FFF;
+    color: #000
+}
+    .sidebar-nav .nav-link:hover {
+        background-color: #f6f9ff;
+        color: #003d32;
+    }
+
+.text-gatekeeper-green {
+    color: #003d32 !important;
 }

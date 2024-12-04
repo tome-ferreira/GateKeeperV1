@@ -1,0 +1,240 @@
+﻿@model CreateShiftViewModel
+@{
+    ViewBag.Title = "Create Shift";
+    Company company = ViewBag.Company;
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div class="container">
+    <h1>Create Shift</h1>
+    <form class="form-check" asp-action="CreateShift" asp-controller="Shift" method="post">
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <!-- Time Selection -->
+        <div class="form-group">
+            <label>Shift Times</label>
+            <button type="button" class="btn btn-secondary" onclick="openTimeSelectionModal()">Set Times</button>
+            <div>
+                <span id="selectedTimes"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="BuildingId">Building</label>
+            <select asp-for="BuildingId" class="form-control">
+                <option value="">Select a Building</option>
+                @foreach (var b in company.Buildings)
+                {
+                    <option value="@b.Id">@b.Name</option>
+                }
+            </select>
+            <span asp-validation-for="BuildingId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="IsRepetitive">
+                <input asp-for="IsRepetitive" type="checkbox" class="form-check-input" checked
+                       onclick="toggleRepetitiveOptions()" />
+                Repetitive Shift
+            </label>
+            <span asp-validation-for="IsRepetitive" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" id="days-selection">
+            <label asp-for="Days">Select Days</label>
+            <div>
+                @foreach (var day in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                {
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" name="Days" value="@day" class="form-check-input day-checkbox" />
+                        <label class="form-check-label">@day</label>
+                    </div>
+                }
+            </div>
+            <span asp-validation-for="Days" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" id="startDateContainer">
+            <label id="startDateLabel" asp-for="EndDate">Start Date</label>
+            <input asp-for="StartDate" type="date" class="form-control" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label id="endDateLabel" asp-for="EndDate">End Date</label>
+            <input asp-for="EndDate" type="date" class="form-control" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+
+        <!--Hidden inputs-->
+        <div class="form-group">
+            <input asp-for="Starts" id="HiddenStarts" type="time" class="form-control" hidden />
+        </div>
+
+        <div class="form-group">
+            <input asp-for="Ends" id="HiddenEnds" type="time" class="form-control" hidden/>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="IsOvernight" id="HiddenIsOvernight" name="IsOvernight" type="hidden" value="false" />
+        </div>
+        <!----------------->
+
+        <button type="submit" class="btn btn-primary">Create Shift</button>
+    </form>
+</div>
+
+<!-- Modal Popup -->
+<div id="timeModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Shift Times</h5>
+                <button type="button" class="close" onclick="closeTimeSelectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modalStarts">Start Time</label>
+                    <input id="modalStarts" type="time" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="modalEnds">End Time</label>
+                    <input id="modalEnds" type="time" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input id="modalIsOvernight" type="checkbox" />
+                        Overnight
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeTimeSelectionModal()">Cancel</button>
+                <button id="confirmButton" type="button" class="btn btn-primary" disabled onclick="confirmTimeSelection()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleRepetitiveOptions() {
+        var isRepetitive = document.getElementById("IsRepetitive").checked;
+        var daysCheckboxes = document.querySelectorAll(".day-checkbox");
+        var endDateLabel = document.getElementById("endDateLabel");
+
+        // Enable/disable each day checkbox
+        daysCheckboxes.forEach(function (checkbox) {
+            checkbox.disabled = !isRepetitive;
+        });
+
+        // Change label text
+        endDateLabel.textContent = isRepetitive ? "End Date" : "Date";
+
+        // Show/hide Start Date
+        startDateContainer.style.display = isRepetitive ? "block" : "none";
+    }
+
+    let modalStarts = document.getElementById("modalStarts");
+    let modalEnds = document.getElementById("modalEnds");
+    let modalIsOvernight = document.getElementById("modalIsOvernight");
+    let confirmButton = document.getElementById("confirmButton");
+
+    function openTimeSelectionModal() {
+        document.getElementById("timeModal").style.display = "block";
+    }
+
+    function closeTimeSelectionModal() {
+        document.getElementById("timeModal").style.display = "none";
+    }
+
+    function validateModalInputs() {
+        if (modalStarts.value && modalEnds.value) {
+            const startTime = modalStarts.value;
+            const endTime = modalEnds.value;
+            const isOvernight = modalIsOvernight.checked;
+
+            if ((!isOvernight && startTime < endTime) || (isOvernight && startTime > endTime)) {
+                confirmButton.disabled = false;
+                return;
+            }
+        }
+        confirmButton.disabled = true;
+    }
+
+    function confirmTimeSelection() {
+        const startTime = modalStarts.value;
+        const endTime = modalEnds.value;
+        const isOvernight = modalIsOvernight.checked;
+
+        // Update main form values (for display)
+        const selectedTimesDisplay = `${startTime} - ${endTime} ${isOvernight ? "(Overnight)" : ""}`;
+        document.getElementById("selectedTimes").textContent = selectedTimesDisplay;
+
+        // store these values in hidden inputs for form submission
+        document.getElementById("HiddenStarts").value = startTime;
+        document.getElementById("HiddenEnds").value = endTime;
+        document.getElementById("HiddenIsOvernight").value = isOvernight;
+
+        closeTimeSelectionModal();
+    }
+
+    // Event listeners for validation
+    modalStarts.addEventListener("input", validateModalInputs);
+    modalEnds.addEventListener("input", validateModalInputs);
+    modalIsOvernight.addEventListener("change", validateModalInputs);
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+        const startDateInput = document.querySelector("input[name='StartDate']");
+        const endDateInput = document.querySelector("input[name='EndDate']");
+
+        // Restrict both dates to be no earlier than today
+        startDateInput.setAttribute("min", today);
+        endDateInput.setAttribute("min", today);
+
+        // Update the end date's min value based on the start date
+        startDateInput.addEventListener("change", function () {
+            const startDate = startDateInput.value;
+
+            if (startDate) {
+                const nextDay = new Date(startDate);
+                nextDay.setDate(nextDay.getDate() + 1); // Increment by one day
+                const minEndDate = nextDay.toISOString().split("T")[0];
+                endDateInput.setAttribute("min", minEndDate);
+
+                // Reset end date if it's before the new min
+                if (endDateInput.value && endDateInput.value < minEndDate) {
+                    endDateInput.value = "";
+                }
+            }
+        });
+
+        // Ensure the start date is before the end date
+        endDateInput.addEventListener("change", function () {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            if (startDate && endDate) {
+                const startDateObj = new Date(startDate);
+                const endDateObj = new Date(endDate);
+
+                if (endDateObj <= startDateObj) {
+                    alert("End date must be at least one day after the start date.");
+                    endDateInput.value = ""; // Clear the invalid input
+                }
+            }
+        });
+    });
+</script>
+

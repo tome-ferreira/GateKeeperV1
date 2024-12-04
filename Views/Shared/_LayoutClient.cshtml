@@ -1,95 +1,107 @@
 ﻿@{
-    Layout = "_Layout.cshtml";
+    Layout = "/Views/Shared/_Layout.cshtml";
     var user = await userManager.GetUserAsync(User);
 }
-<div class="sidebar close">
-    <div class="logo-details">
-        <i class='bx bxl-c-plus-plus'></i>
-        <span class="logo_name">CodingLab</span>
+
+<!-- ======= Header ======= -->
+<header id="header" class="header fixed-top d-flex align-items-center top-navbar">
+    
+    <div class="d-flex align-items-center justify-content-between">
+        <a asp-action="Index" asp-controller="Home" class="logo d-flex align-items-center">
+            <img src="/img/logos/logoBigWhiteText.png" alt="Logo" class="top-nav-bar-logo" style="height: 100px">
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn text-white"></i>
     </div>
-    <ul class="nav-links">
-        <li>
-            <a asp-action="Index" asp-controller="Dashboard">
-                <i class='bx bx-line-chart'></i>
-                <span class="link_name">Dashboard</span>
+    
+
+
+
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+            <li class="nav-item dropdown pe-3">
+                <a class=" nav-link sidebar-item " asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                    <i class='bx bx-user text-white'></i> <span class="icon-text">Minha conta</span>
+                </a>
+            </li>
+            <li class="nav-item dropdown pe-3">
+                <a href="#" onclick="logout()">
+                    <i class='bx bx-log-out-circle text-white'></i> <span class="icon-text text-white">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</header>
+
+
+<!-- ======= Sidebar ======= -->
+<aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link side-navbar-item" asp-action="Index" asp-controller="Dashboard">
+                <i class='bx bx-line-chart text-gatekeeper-green'></i>
+                <span>Dashboard</span>
             </a>
         </li>
         @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
         {
-            <li>
-                <div class="iocn-link">
+            <li class="nav-item text-gatekeeper-green">
+                <a class="nav-link collapsed" data-bs-target="#workers-nav" data-bs-toggle="collapse" href="#">
+                  <i class="bx bxs-user-badge text-gatekeeper-green"></i><span>Trabalhadores</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="workers-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                  <li>
                     <a asp-action="ListWorkers" asp-controller="Worker">
-                        <i class='bx bxs-user-badge'></i>
-                        <span class="link_name">Workers</span>
+                        <i class='bx bx-list-ul text-gatekeeper-green'></i><span>Lista de Trabalhadores</span>
                     </a>
+                  </li>
                     @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
                     {
-                        <i class='bx bxs-chevron-down arrow'></i>
+                      <li>
+                        <a asp-action="CreateWorker" asp-controller="Worker">
+                            <i class='bx bx-user-plus text-gatekeeper-green'></i><span>Criar Trabalhador</span>
+                        </a>
+                      </li>
                     }
-                </div>
-                @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
-                {
-                    <ul class="sub-menu">
-                        <li><a class="link_name" asp-action="ListWorkers" asp-controller="Worker">Workers</a></li>
-                        <li><a asp-action="CreateWorker" asp-controller="Worker">Create worker</a></li>
-                    </ul>
-                }
+                </ul>
             </li>
         }
         @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
         {
-            <li>
-                <div class="iocn-link">
+             <li class="nav-item text-gatekeeper-green">
+                <a class="nav-link collapsed" data-bs-target="#buildings-nav" data-bs-toggle="collapse" href="#">
+                  <i class="bx bx-buildings text-gatekeeper-green"></i><span>Edifícios</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="buildings-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                  <li>
                     <a asp-action="ListBuildings" asp-controller="Building">
-                        <i class='bx bx-building-house'></i>
-                        <span class="link_name">Buildings</span>
+                        <i class='bx bx-list-ul text-gatekeeper-green'></i><span>Lista de Edifícios</span>
                     </a>
-                    <i class='bx bxs-chevron-down arrow'></i>
-                </div>
-                <ul class="sub-menu">
-                    <li><a class="link_name" asp-action="ListBuildings" asp-controller="Building">Buildings</a></li>
-                    <li><a asp-action="CreateBuilding" asp-controller="Building">Add building</a></li>
+                  </li>
+                  <li>
+                    <a asp-action="CreateBuilding" asp-controller="Building">
+                        <i class='bx bx-building text-gatekeeper-green'></i><span>Adiconar Edifício</span>
+                    </a>
+                  </li>
                 </ul>
             </li>
         }
-        
-        
-        <!--Account center-->
-        <li>
-            <div class="profile-details">
-                <div class="profile-content">
-                    <img src="image/profile.jpg" alt="profileImg">
-                </div>
-                <div class="name-job">
-                    <div class="job">@user.Name @user.Surname</div>
-                    <div class="job">@{var job = await functions.PrintUserRoleView(user.Id);}@job</div>
-                </div>
-                <a href="#" onclick="logout()"><i class='bx bx-log-out'></i></a>
-            </div>
-            
-        </li>
     </ul>
-</div>
-<section class="home-section">
-    <div class="home-content">
-        <i class='bx bx-menu'></i>
-        <div class="">
-            @RenderBody()
-        </div>
-    </div>
-</section>
+</aside>
+<!-- ======================= -->
 
-<script>
-    function logout() {
-        fetch('/Account/logout', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '@Html.AntiForgeryToken()'  // for CSRF protection
-            }
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '/'; // Redirect after logout
-            }
-        }).catch(error => console.error('Error logging out:', error));
-    }
-</script>
+<main id="main" class="main">
+    <div>
+        @RenderBody()
+    </div>
+</main>
+
+
+
+
+
+
+
+
+
+

@@ -23,6 +23,8 @@ namespace GateKeeperV1.Data
         public DbSet<AbsenceJustification> AbsenceJustifications { get; set; }
         public DbSet<JustificationDocument> JustificationDocuments { get; set; }
         public DbSet<OffdayVacationRequest> OffdayVacationRequests { get; set; }
+        public DbSet<ShiftDays> ShiftDays { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -122,6 +124,13 @@ namespace GateKeeperV1.Data
                 .WithMany(au => au.WorkerProfiles)
                 .HasForeignKey(wp => wp.ApplicationUserId)
                 .IsRequired(); // Ensures that each WorkerProfile must have an ApplicationUser
+
+            // Configure one-to-many relationship between Shift and ShiftDays
+            modelBuilder.Entity<Shift>()
+                .HasMany(s => s.ShiftDays)
+                .WithOne(sd => sd.Shift)
+                .HasForeignKey(sd => sd.ShiftId)
+                .OnDelete(DeleteBehavior.Cascade);  // Set delete behavior if needed
 
         }
 

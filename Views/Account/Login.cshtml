@@ -1,32 +1,45 @@
 ﻿@model LoginViewModel
 
 @{
+    Layout = "/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "User Login";
 }
 
-<div class="container">
-    <h1>User Login</h1>
+<div class="d-flex justify-content-center align-items-center vh-100 costum-background-login-register">
+    <div class="card p-4 shadow-lg login-register-card">
+        <div class="text-center">
+            <h1 class="mb-4">
+                <img src="/img/logos/logoSmall.png" alt="Logo" class="img-fluid login-register-logo" />
+            </h1>
+            <h4 class="mb-4">Log in</h4>
+        </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <form method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form method="post" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <label asp-for="Email"></label>
-                <input asp-for="Email" class="form-control" required type="email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-
-                <label asp-for="Password"></label>
-                <input asp-for="Password" class="form-control" required type="password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-
-                <label asp-for="RememberMe">
-                    <input asp-for="RememberMe" />
-                    Remember me
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label ">
+                    <i class="bx bx-envelope"></i> Email
                 </label>
+                <input asp-for="Email" class="form-control" type="email" required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
 
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label ">
+                    <i class="bx bx-key"></i> Password
+                </label>
+                <input asp-for="Password" class="form-control" type="password" required />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="#" class="text-decoration-none login-register-links">Forgot your password?</a><br />
+            <a asp-controller="Account" asp-action="Register" class="text-decoration-none login-register-links">Register as a new user</a><br />
+            <a href="#" class="text-decoration-none login-register-links">Resend email confirmation</a>
         </div>
     </div>
 </div>

@@ -96,8 +96,8 @@ namespace GateKeeperV1.Controllers
                     // Hash the password with the salt
                     byte[] hashedPassword = HashPassword(model.Password, salt);
 
-                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt),
-                        DateTime.Now.AddYears(99), 1, 500, 5, 1, false, 0.00, 0.00);
+                    Company company = new Company(model.Name, model.Description, await GenerateUserName(model.Name),
+                        Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt), DateTime.Now.AddYears(99), 1, 500, 5, 1, false, 0.00, 0.00);
                     await dbContext.Companies.AddAsync(company);
 
                     var user = await userManager.GetUserAsync(User);
@@ -120,8 +120,8 @@ namespace GateKeeperV1.Controllers
                     // Hash the password with the salt
                     byte[] hashedPassword = HashPassword(model.Password, salt);
 
-                    Company company = new Company(model.Name, model.Description, Convert.ToBase64String(hashedPassword), Convert.ToBase64String(salt),
-                        DateTime.Now.AddYears(99), 3, 1500, 9999999, 3, true, 49.00, 539.00);
+                    Company company = new Company(model.Name, model.Description, await GenerateUserName(model.Name), Convert.ToBase64String(hashedPassword), 
+                        Convert.ToBase64String(salt), DateTime.Now.AddYears(99), 3, 1500, 9999999, 3, true, 49.00, 539.00);
                     await dbContext.Companies.AddAsync(company);
 
                     var user = await userManager.GetUserAsync(User);
@@ -141,28 +141,48 @@ namespace GateKeeperV1.Controllers
             return View("Error");
         }
 
+        private async Task<string> GenerateUserName(string name)
+        {
+            string baseUserName = name.Replace(" ", ".").ToLower();
 
-        
-                
+            string uniqueUserName = baseUserName;
+            int counter = 1;
 
-                //Save pfp====================================================
-                /*
-                var companyPath = Path.Combine(webHostEnvironment.WebRootPath, "img/pfps", company.Id.ToString());
-                if (!Directory.Exists(companyPath))
-                {
-                    Directory.CreateDirectory(companyPath);
-                }
-                if (profileModel.pfp != null)
-                {
-                    string extension = Path.GetExtension(profileModel.pfp.FileName);
-                    var newFileName = $"{userId}{extension}";
-                    var newFilePath = Path.Combine(companyPath, newFileName);
-                    using (var stream = new FileStream(newFilePath, FileMode.Create))
-                    {
-                        profileModel.pfp.CopyTo(stream);
-                    }
-                }*/
-                //============================================================
+            while (!await IsUserNameUnique(uniqueUserName))
+            {
+                uniqueUserName = $"{baseUserName}{counter}";
+                counter++;
+            }
+
+            return uniqueUserName;
+        }
+        private async Task<bool> IsUserNameUnique(string userName)
+        {
+            var existingUserNames = await dbContext.Companies.Select(c => c.Username).ToListAsync();
+            return !existingUserNames.Contains(userName);
+        }
+
+
+
+
+        //Save pfp====================================================
+        /*
+        var companyPath = Path.Combine(webHostEnvironment.WebRootPath, "img/pfps", company.Id.ToString());
+        if (!Directory.Exists(companyPath))
+        {
+            Directory.CreateDirectory(companyPath);
+        }
+        if (profileModel.pfp != null)
+        {
+            string extension = Path.GetExtension(profileModel.pfp.FileName);
+            var newFileName = $"{userId}{extension}";
+            var newFilePath = Path.Combine(companyPath, newFileName);
+            using (var stream = new FileStream(newFilePath, FileMode.Create))
+            {
+                profileModel.pfp.CopyTo(stream);
+            }
+        }*/
+        //============================================================
 
 
 

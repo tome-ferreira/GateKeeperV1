@@ -4,7 +4,8 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; }        
+        public string Username { get; set; }
         public string Password { get; set; }
         public string Salt { get; set; }
         public DateTime ValidUntil { get; set; }
@@ -28,11 +29,12 @@
         public ICollection<OffdayVacationRequest> OffdayVacationRequests { get; set; } = new List<OffdayVacationRequest>();
 
         //Bob o construtor
-        public Company(string name, string description, string password, string salt, DateTime validUntil, int buildingsN, int registsPerMonth, int workersN,
+        public Company(string name, string description, string username, string password, string salt, DateTime validUntil, int buildingsN, int registsPerMonth, int workersN,
             int dashboardAccounts, bool hasExcel, double monthlyPrice, double anualPrice)
         { 
             Name = name;
             Description = description;
+            Username = username;
             Password = password;
             Salt = salt;
             ValidUntil = validUntil;

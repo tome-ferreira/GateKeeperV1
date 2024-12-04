@@ -1,24 +1,77 @@
 ﻿@using Microsoft.AspNetCore.Identity;
 @inject SignInManager<ApplicationUser> signInManager;
+@using System.Globalization;
+
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    <title>@ViewData["Title"] - XISCARD</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - XISCARD</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GateKeeperV1.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true" />
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vendor CSS Files -->
+    <link href="@Url.Content("~/vendor/bootstrap/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/vendor/bootstrap-icons/bootstrap-icons.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/vendor/boxicons/css/boxicons.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/vendor/quill/quill.snow.css")" rel="stylesheet">
+    <link href="@Url.Content("~/vendor/quill/quill.bubble.css")" rel="stylesheet">
+    <link href="@Url.Content("~/vendor/remixicon/remixicon.css")" rel="stylesheet">
+    <link href="@Url.Content("~/vendor/simple-datatables/style.css")" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="@Url.Content("~/css/style.css")" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body>
+
     @RenderBody()
+
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script src="@Url.Content("~/vendor/apexcharts/apexcharts.min.js")"></script>
+    <script src="@Url.Content("~/vendor/bootstrap/js/bootstrap.bundle.min.js")"></script>
+    <script src="@Url.Content("~/vendor/chart.js/chart.umd.js")"></script>
+    <script src="@Url.Content("~/vendor/echarts/echarts.min.js")"></script>
+    <script src="@Url.Content("~/vendor/quill/quill.min.js")"></script>
+    <script src="@Url.Content("~/vendor/simple-datatables/simple-datatables.js")"></script>
+    <script src="@Url.Content("~/vendor/tinymce/tinymce.min.js")"></script>
+    <script src="@Url.Content("~/vendor/php-email-form/validate.js")"></script>
+    <!-- Template Main JS File -->
+    <script src="@Url.Content("~/js/main.js")"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/sidebar.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        function logout() {
+            fetch('/Account/logout', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '@Html.AntiForgeryToken()'  // for CSRF protection
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/'; // Redirect after logout
+                }
+            }).catch(error => console.error('Error logging out:', error));
+        }
+    </script>
 </body>
 </html>
