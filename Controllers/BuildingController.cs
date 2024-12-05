@@ -41,14 +41,14 @@ namespace GateKeeperV1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBuilding(CreateBuildingViewModel model)
         {
-            string? companyId = HttpContext.Session.GetString("companyId");
-            if (string.IsNullOrEmpty(companyId))
+            string? companyId = HttpContext.Session.GetString("companyId");//
+            if (string.IsNullOrEmpty(companyId))//
             {
-                return RedirectToAction("Index", "Client");
+                return RedirectToAction("Index", "Client");//
             }
 
-            var user = await userManager.GetUserAsync(User);
-            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+            var user = await userManager.GetUserAsync(User);//
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }//
 
             if (ModelState.IsValid)
             {
