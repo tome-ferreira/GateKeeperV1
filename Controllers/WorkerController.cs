@@ -258,5 +258,62 @@ namespace GateKeeperV1.Controllers
             }
             return View("Error");
         }
+
+
+        
+        public async Task<IActionResult> ListWorkersTeams()
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin") || await functions.IsUserInCompanyRole(user.Id, "HR"); if (!canAcess) { return View("AcessDenied"); }
+
+            var company = await dbContext.Companies.Include(c => c.Teams).Where(c => c.Id.ToString() == companyId).FirstAsync();
+
+            return View(company);
+        }
+        [HttpGet]
+        public async Task<IActionResult> CreateTeam()
+        {
+
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var workers = await dbContext.WorkerProfiles
+                .Include(w => w.ApplicationUser) 
+                .Where(w => w.CompanyId.ToString() == companyId)
+                .ToListAsync();
+
+
+            CreateTeamViewModel model = new CreateTeamViewModel() { };
+
+            foreach (var w in workers) 
+            {
+                WorkerInTeamViewModel worker = new WorkerInTeamViewModel()
+                {
+                    UserId = w.Id,
+                    Email = w.ApplicationUser.Email,
+                    Role = w.Role,
+                    FullName = w.ApplicationUser.Name + " " + w.ApplicationUser.Surname,
+                    isSelected = false
+                };
+
+                model.Workers.Add(worker);
+            }
+
+            
+
+            return View(model);
+        }
     }
 }

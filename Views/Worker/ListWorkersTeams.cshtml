@@ -1,0 +1,45 @@
+﻿@model Company
+@{
+    ViewBag.Title = "Equipas de trabalhadores";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    var user = await userManager.GetUserAsync(User);
+}
+
+<div class="container">
+    <h2>Equipas de trabalhadores</h2>
+    <div class="col-md-8">
+        @if(Model != null && Model.Teams != null && Model.Teams.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Trabalhadores</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var team in Model.Teams)
+                    {
+                        <tr>
+                            <td>@team.Name</td>
+                            <td>@team.TeamMemberships.Count()</td>
+                            <td><a class="btn btn-primary" asp-action="TeamDetails" asp-controller="Worker" asp-route-teamId="@team.Id">Details</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>Não existe nenhuma equipa de momento</p>
+        }
+    </div>
+    <div class="col-md-4">
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
+        {
+            <a class="btn btn-primary" asp-action="CreateTeam" asp-controller="Worker">Crie uma equipa</a>
+        }
+        <a class="btn btn-primary" aps-action="Index" asp-controller="Shift">Ir para turnos</a>
+    </div>
+</div>

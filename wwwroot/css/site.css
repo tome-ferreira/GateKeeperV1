@@ -126,3 +126,7 @@ body {
 .text-gatekeeper-green {
     color: #003d32 !important;
 }
+
+.important-black-text{
+    color: #000 !important;
+}

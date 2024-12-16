@@ -24,6 +24,8 @@ namespace GateKeeperV1.Data
         public DbSet<JustificationDocument> JustificationDocuments { get; set; }
         public DbSet<OffdayVacationRequest> OffdayVacationRequests { get; set; }
         public DbSet<ShiftDays> ShiftDays { get; set; }
+        public DbSet<WorkersTeam> WorkersTeams { get; set; }
+        public DbSet<WorkerTeamMembership> WorkerTeamMemberships { get; set; }
 
 
 
@@ -131,6 +133,29 @@ namespace GateKeeperV1.Data
                 .WithOne(sd => sd.Shift)
                 .HasForeignKey(sd => sd.ShiftId)
                 .OnDelete(DeleteBehavior.Cascade);  // Set delete behavior if needed
+
+
+            // Many-to-many relationship between WorkerProfile and WorkersTeam
+            modelBuilder.Entity<WorkerTeamMembership>()
+                .HasKey(wtm => new { wtm.WorkerId, wtm.TeamId }); // Composite key
+
+            modelBuilder.Entity<WorkerTeamMembership>()
+                .HasOne(wtm => wtm.Worker)
+                .WithMany(w => w.TeamMemberships)
+                .HasForeignKey(wtm => wtm.WorkerId);
+
+            modelBuilder.Entity<WorkerTeamMembership>()
+                .HasOne(wtm => wtm.Team)
+                .WithMany(t => t.TeamMemberships)
+                .HasForeignKey(wtm => wtm.TeamId);
+
+            // One-to-many relationship between Company and WorkersTeam
+            modelBuilder.Entity<WorkersTeam>()
+                .HasOne(wt => wt.Company)           
+                .WithMany(c => c.Teams)             
+                .HasForeignKey(wt => wt.CompanyId)  
+                .OnDelete(DeleteBehavior.Cascade);  
+
 
         }
 

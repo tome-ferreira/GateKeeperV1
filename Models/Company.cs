@@ -27,6 +27,8 @@
         public ICollection<Shift> Shifts { get; set; } = new List<Shift>();
         public ICollection<AbsenceJustification> AbsenceJustifications { get; set; } = new List<AbsenceJustification>();
         public ICollection<OffdayVacationRequest> OffdayVacationRequests { get; set; } = new List<OffdayVacationRequest>();
+        public ICollection<WorkersTeam> Teams { get; set; } = new List<WorkersTeam>();
+
 
         //Bob o construtor
         public Company(string name, string description, string username, string password, string salt, DateTime validUntil, int buildingsN, int registsPerMonth, int workersN,

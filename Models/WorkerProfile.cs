@@ -20,6 +20,8 @@ namespace GateKeeperV1.Models
         public ICollection<WorkerShift> WorkerShifts { get; set; } = new List<WorkerShift>();
         public ICollection<AbsenceJustification> AbsenceJustifications { get; set; } = new List<AbsenceJustification>();
         public ICollection<OffdayVacationRequest> OffdayVacationRequests { get; set; } = new List<OffdayVacationRequest>();
+        public ICollection<WorkerTeamMembership> TeamMemberships { get; set; } = new List<WorkerTeamMembership>();
+
 
 
         public WorkerProfile() { }

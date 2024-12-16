@@ -32,8 +32,13 @@
     <!-- Template Main CSS File -->
     <link href="@Url.Content("~/css/style.css")" rel="stylesheet" />
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
+
+
 
 <body>
 
@@ -57,6 +62,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/sidebar.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>

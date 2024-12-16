@@ -70,5 +70,6 @@
     {
         <!--ToDo: pop up-->
         <a class="btn btn-danger" asp-action="DeleteWorker" asp-controller="Worker" asp-route-workerId="@Model.Id">Delete worker</a>
+        <a class="btn btn-primary" asp-action="GenerateQrCode" asp-controller="QrCode" asp-route-WorkerId="@Model.Id">Generate Qr Code</a>
     }
 </div>
