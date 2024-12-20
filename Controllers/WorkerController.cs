@@ -7,6 +7,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.Security.Cryptography;
 using System.Text;
@@ -261,21 +262,7 @@ namespace GateKeeperV1.Controllers
 
 
         
-        public async Task<IActionResult> ListWorkersTeams()
-        {
-            string? companyId = HttpContext.Session.GetString("companyId");
-            if (string.IsNullOrEmpty(companyId))
-            {
-                return RedirectToAction("Index", "Client");
-            }
-
-            var user = await userManager.GetUserAsync(User);
-            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin") || await functions.IsUserInCompanyRole(user.Id, "HR"); if (!canAcess) { return View("AcessDenied"); }
-
-            var company = await dbContext.Companies.Include(c => c.Teams).Where(c => c.Id.ToString() == companyId).FirstAsync();
-
-            return View(company);
-        }
+        
         [HttpGet]
         public async Task<IActionResult> CreateTeam()
         {
@@ -314,6 +301,248 @@ namespace GateKeeperV1.Controllers
             
 
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTeam(CreateTeamViewModel model)
+        {
+            if (!model.Workers.Where(w => w.isSelected == true).Any() || model.Name.IsNullOrEmpty())
+            {
+                if(model.Name.IsNullOrEmpty()) 
+                {
+                    ViewBag.NameError = "O campo nome é obrigatório.";
+                }
+                if (!model.Workers.Where(w => w.isSelected == true).Any()) 
+                {
+                    ViewBag.WorkersError = "Por favor selecione pelo menos um trabalhador.";
+                }
+                return View(model);
+            }
+
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            WorkersTeam workersTeam = new WorkersTeam() 
+            { 
+                Name = model.Name,
+                Description = model.Description,
+                CompanyId = Guid.Parse(companyId),
+            };
+
+            await dbContext.WorkersTeams.AddAsync(workersTeam);
+
+            var teamMemberships = new List<WorkerTeamMembership>();
+
+            foreach (var wrk in model.Workers)
+            {
+                if (wrk.isSelected)
+                {
+                    teamMemberships.Add(new WorkerTeamMembership()
+                    {
+                        TeamId = workersTeam.Id,
+                        WorkerId = wrk.UserId
+                    });
+                }
+            }
+
+            await dbContext.WorkerTeamMemberships.AddRangeAsync(teamMemberships);
+
+            await dbContext.SaveChangesAsync();
+
+            return RedirectToAction("TeamDetails", "Worker", new { TeamId = workersTeam.Id });
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> TeamDetails(Guid TeamId)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin") || await functions.IsUserInCompanyRole(user.Id, "HR"); if (!canAcess) { return View("AcessDenied"); }
+
+            var team = await dbContext.WorkersTeams.Include(wt => wt.TeamMemberships).ThenInclude(tm => tm.Worker).ThenInclude(w => w.ApplicationUser).Where(wt => wt.Id == TeamId).FirstOrDefaultAsync();
+
+            if(team == null)
+            {
+                return View("Error");
+            }
+
+            return View(team);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ListTeams()
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin") || await functions.IsUserInCompanyRole(user.Id, "HR"); if (!canAcess) { return View("AcessDenied"); }
+
+
+            var teams = await dbContext.WorkersTeams.Include(wt => wt.TeamMemberships).Where(wt => wt.CompanyId == Guid.Parse(companyId)).ToListAsync();
+
+            return View(teams);
+        }
+
+        public async Task<IActionResult> DeleteTeam(Guid Id)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var team = await dbContext.WorkersTeams.Include(wt => wt.TeamMemberships).Where(wt => wt.Id == Id).FirstOrDefaultAsync();
+
+            if (team == null) 
+            { 
+                ViewBag.Error = "Erro ao apagar equipa";  
+                return RedirectToAction("ListTeams", "Worker"); 
+            }
+
+            
+
+            dbContext.WorkersTeams.Remove(team);
+            dbContext.WorkerTeamMemberships.RemoveRange(team.TeamMemberships);
+
+            await dbContext.SaveChangesAsync();
+
+
+            return RedirectToAction("ListTeams", "Worker");
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> EditTeam (Guid TeamId)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var team = await dbContext.WorkersTeams
+                .Include(wt => wt.TeamMemberships)
+                .ThenInclude(tm => tm.Worker)
+                .ThenInclude(w => w.ApplicationUser)
+                .Where(wt => wt.Id == TeamId)
+                .FirstOrDefaultAsync();
+
+            if (team == null)
+            {
+                ViewBag.Error = "Erro ao editar equipa";
+                return RedirectToAction("ListTeams", "Worker");
+            }
+
+            var workers = await dbContext.WorkerProfiles
+                .Include(w => w.ApplicationUser)
+                .Where(w => w.CompanyId.ToString() == companyId)
+                .ToListAsync();
+
+
+
+            EditTeamViewModel model = new EditTeamViewModel()
+            {  
+                Id = team.Id,
+                Name = team.Name,
+                Description = team.Description,
+            };
+
+            foreach(var w in team.TeamMemberships)
+            {
+                WorkerInTeamViewModel worker = new WorkerInTeamViewModel()
+                {
+                    UserId = w.Worker.Id,
+                    Email = w.Worker.ApplicationUser.Email,
+                    Role = w.Worker.Role,
+                    FullName = w.Worker.ApplicationUser.Name + " " + w.Worker.ApplicationUser.Surname,
+                    isSelected = true
+                };
+                model.Workers.Add(worker);
+            }
+
+            foreach (var w in workers)
+            {
+                WorkerInTeamViewModel worker = new WorkerInTeamViewModel()
+                {
+                    UserId = w.Id,
+                    Email = w.ApplicationUser.Email,
+                    Role = w.Role,
+                    FullName = w.ApplicationUser.Name + " " + w.ApplicationUser.Surname,
+                    isSelected = false
+                };
+
+                if (!model.Workers.Where(wk => wk.UserId == w.Id).Any())
+                {
+                    model.Workers.Add(worker);
+                }
+            }
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> EditTeam(EditTeamViewModel model)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var team = await dbContext.WorkersTeams.Include(wt => wt.TeamMemberships).Where(wt => wt.Id == model.Id).FirstOrDefaultAsync();
+
+            team.Name = model.Name;
+            team.Description = model.Description;
+
+            dbContext.WorkerTeamMemberships.RemoveRange(team.TeamMemberships);
+
+
+
+            var teamMemberships = new List<WorkerTeamMembership>();
+
+            foreach (var wrk in model.Workers)
+            {
+                if (wrk.isSelected)
+                {
+                    teamMemberships.Add(new WorkerTeamMembership()
+                    {
+                        TeamId = model.Id,
+                        WorkerId = wrk.UserId
+                    });
+                }
+            }
+
+            await dbContext.WorkerTeamMemberships.AddRangeAsync(teamMemberships);
+
+            await dbContext.SaveChangesAsync();
+
+            return RedirectToAction("TeamDetails", "Worker", new { TeamId = model.Id });
         }
     }
 }

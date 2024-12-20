@@ -1,79 +1,132 @@
 ﻿@model CreateShiftViewModel
 @{
-    ViewBag.Title = "Create Shift";
+    ViewBag.Title = "Criar turno";
     Company company = ViewBag.Company;
     Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    
+    
+    var dayTranslations = new Dictionary<DayOfWeek, string>
+    {
+        { DayOfWeek.Sunday, "Domingo" },
+        { DayOfWeek.Monday, "Segunda-feira" },
+        { DayOfWeek.Tuesday, "Terça-feira" },
+        { DayOfWeek.Wednesday, "Quarta-feira" },
+        { DayOfWeek.Thursday, "Quinta-feira" },
+        { DayOfWeek.Friday, "Sexta-feira" },
+        { DayOfWeek.Saturday, "Sábado" }
+    };
+
 }
 
 <div class="container">
-    <h1>Create Shift</h1>
-    <form class="form-check" asp-action="CreateShift" asp-controller="Shift" method="post">
-        <div class="form-group">
-            <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Description"></label>
-            <input asp-for="Description" class="form-control" />
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
-
-        <!-- Time Selection -->
-        <div class="form-group">
-            <label>Shift Times</label>
-            <button type="button" class="btn btn-secondary" onclick="openTimeSelectionModal()">Set Times</button>
-            <div>
-                <span id="selectedTimes"></span>
+    <h1>Criar turno</h1>
+    <form class="" asp-action="CreateShift" asp-controller="Shift" method="post">
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label asp-for="Name">Nome</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
             </div>
         </div>
 
-        <div class="form-group">
-            <label asp-for="BuildingId">Building</label>
-            <select asp-for="BuildingId" class="form-control">
-                <option value="">Select a Building</option>
-                @foreach (var b in company.Buildings)
-                {
-                    <option value="@b.Id">@b.Name</option>
-                }
-            </select>
-            <span asp-validation-for="BuildingId" class="text-danger"></span>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label asp-for="Description">Descrição</label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label asp-for="IsRepetitive">
-                <input asp-for="IsRepetitive" type="checkbox" class="form-check-input" checked
-                       onclick="toggleRepetitiveOptions()" />
-                Repetitive Shift
-            </label>
-            <span asp-validation-for="IsRepetitive" class="text-danger"></span>
-        </div>
-
-        <div class="form-group" id="days-selection">
-            <label asp-for="Days">Select Days</label>
-            <div>
-                @foreach (var day in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
-                {
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" name="Days" value="@day" class="form-check-input day-checkbox" />
-                        <label class="form-check-label">@day</label>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <!-- Time Selection -->
+                <div class="form-group">
+                    
+                    <button type="button" class="btn btn-secondary" onclick="openTimeSelectionModal()">Definir horário</button>
+                    <div>
+                        <span id="selectedTimes"></span>
                     </div>
-                }
+                </div>
             </div>
-            <span asp-validation-for="Days" class="text-danger"></span>
+
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label asp-for="BuildingId">Building</label>
+                    <select asp-for="BuildingId" class="form-control">
+                        <option value="">Selecione um edifício</option>
+                        @foreach (var b in company.Buildings)
+                        {
+                            <option value="@b.Id">@b.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="BuildingId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label asp-for="IsRepetitive">
+                        <input asp-for="IsRepetitive" type="checkbox" class="form-check-input" checked
+                               onclick="toggleRepetitiveOptions()" />
+                        Turno repetitivo
+                    </label>
+                    <span asp-validation-for="IsRepetitive" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group" id="startDateContainer">
-            <label id="startDateLabel" asp-for="EndDate">Start Date</label>
-            <input asp-for="StartDate" type="date" class="form-control" />
-            <span asp-validation-for="StartDate" class="text-danger"></span>
+        
+
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="form-group" id="days-selection">
+                    <label asp-for="Days">Selecionar dias</label>
+                    <div>
+                        @foreach (var day in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                        {
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="Days" value="@day" class="form-check-input day-checkbox" />
+                                <label class="form-check-label">@dayTranslations[day]</label>
+                            </div>
+                        }
+                    </div>
+                    <span asp-validation-for="Days" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label id="endDateLabel" asp-for="EndDate">End Date</label>
-            <input asp-for="EndDate" type="date" class="form-control" />
-            <span asp-validation-for="EndDate" class="text-danger"></span>
+        <div class="row mt-3">
+            <div class="col-md-5">
+                <div class="form-group" id="startDateContainer">
+                    <label id="startDateLabel" asp-for="EndDate">Data de início</label>
+                    <input asp-for="StartDate" type="date" class="form-control" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label id="endDateLabel" asp-for="EndDate">Data de fim</label>
+                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <!--CARREGAR TABELA DE EQUIPAS ATRAVÉS DE UM PARTIAL-->
+            <div class="col-md-5" id="teamTableContainer">
+                @Html.Partial("_TeamsTable", Model.Teams)
+            </div>
+
+            <!--CARREGAR TABELA DE TRABALHADORES ATRAVÉS DE UM PARTIAL-->
+            <div class="col-md-6" id="workerTableContainer">
+                @Html.Partial("_WorkersTable", Model.Workers)
+            </div>
         </div>
 
         <!--Hidden inputs-->
@@ -90,7 +143,7 @@
         </div>
         <!----------------->
 
-        <button type="submit" class="btn btn-primary">Create Shift</button>
+        <button type="submit" class="btn btn-primary">Criar turno</button>
     </form>
 </div>
 
@@ -99,32 +152,37 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Select Shift Times</h5>
-                <button type="button" class="close" onclick="closeTimeSelectionModal()">&times;</button>
+                <h5 class="modal-title">Selecionar horário</h5>
+                
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="modalStarts">Start Time</label>
+                    <label for="modalStarts">Hora de início</label>
                     <input id="modalStarts" type="time" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label for="modalEnds">End Time</label>
+                    <label for="modalEnds">Hora de fim</label>
                     <input id="modalEnds" type="time" class="form-control" />
                 </div>
                 <div class="form-group">
                     <label>
                         <input id="modalIsOvernight" type="checkbox" />
-                        Overnight
+                        Noturno
                     </label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeTimeSelectionModal()">Cancel</button>
-                <button id="confirmButton" type="button" class="btn btn-primary" disabled onclick="confirmTimeSelection()">Confirm</button>
+                <button type="button" class="btn btn-secondary" onclick="closeTimeSelectionModal()">Cancelar</button>
+                <button id="confirmButton" type="button" class="btn btn-primary" disabled onclick="confirmTimeSelection()">Confirmar</button>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
+
 
 <script>
     function toggleRepetitiveOptions() {
@@ -138,7 +196,7 @@
         });
 
         // Change label text
-        endDateLabel.textContent = isRepetitive ? "End Date" : "Date";
+        endDateLabel.textContent = isRepetitive ? "Data de fim" : "Data";
 
         // Show/hide Start Date
         startDateContainer.style.display = isRepetitive ? "block" : "none";

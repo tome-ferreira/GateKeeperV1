@@ -52,16 +52,39 @@
                 <ul id="workers-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                   <li>
                     <a asp-action="ListWorkers" asp-controller="Worker">
-                        <i class='bx bx-list-ul text-gatekeeper-green'></i><span class="important-black-text">Lista de Trabalhadores</span>
+                        <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Lista de Trabalhadores</span>
                     </a>
                   </li>
                     @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
                     {
                       <li>
                         <a asp-action="CreateWorker" asp-controller="Worker">
-                            <i class='bx bx-user-plus text-gatekeeper-green'></i><span class="important-black-text">Criar Trabalhador</span>
+                            <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Criar Trabalhador</span>
                         </a>
                       </li>
+                    }
+                </ul>
+            </li>
+        }
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
+        {
+            <li class="nav-item text-gatekeeper-green">
+                <a class="nav-link collapsed" data-bs-target="#workersteams-nav" data-bs-toggle="collapse" href="#">
+                    <i class="bx bxs-group text-gatekeeper-green"></i><span class="important-black-text">Equipas</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="workersteams-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                    <li>
+                        <a asp-action="ListTeams" asp-controller="Worker">
+                            <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Lista de Equipas</span>
+                        </a>
+                    </li>
+                    @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
+                    {
+                        <li>
+                            <a asp-action="CreateTeam" asp-controller="Worker">
+                                <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Criar Equipa</span>
+                            </a>
+                        </li>
                     }
                 </ul>
             </li>
@@ -75,12 +98,12 @@
                 <ul id="buildings-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                   <li>
                     <a asp-action="ListBuildings" asp-controller="Building">
-                        <i class='bx bx-list-ul text-gatekeeper-green'></i><span class="important-black-text">Lista de Edifícios</span>
+                        <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Lista de Edifícios</span>
                     </a>
                   </li>
                   <li>
                     <a asp-action="CreateBuilding" asp-controller="Building">
-                        <i class='bx bx-building text-gatekeeper-green'></i><span class="important-black-text">Adiconar Edifício</span>
+                        <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Adiconar Edifício</span>
                     </a>
                   </li>
                 </ul>

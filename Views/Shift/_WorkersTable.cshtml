@@ -1,0 +1,27 @@
+﻿@model List<WorkerInCreateShiftViewModel>
+
+<h3>Trabalhadores</h3>
+<table class="table" id="createShiftWorkerTable">
+    <thead>
+        <tr>
+            <th>Trabalhador</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <input type="hidden" asp-for="@Model[i].Id" class="worker-id"/>
+                <td>
+                    <input type="hidden" asp-for="@Model[i].Name" class="worker-name" />
+                    @Model[i].Name <br /><span class="worker-email"> @Model[i].Email</span>
+                </td>
+
+                <td>
+                    <input asp-for="@Model[i].isSelected" class="form-check-input selected-worker-checkbox worker-checkbox" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

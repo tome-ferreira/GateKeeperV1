@@ -62,9 +62,42 @@ namespace GateKeeperV1.Controllers
 
             var company = await dbContext.Companies.Include(c => c.Buildings).Where(c => c.Id.ToString() ==  companyId).FirstAsync();
 
+            var teams = await dbContext.WorkersTeams.Include(t => t.TeamMemberships).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
+            var workers = await dbContext.WorkerProfiles.Include(t => t.ApplicationUser).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
+
+            CreateShiftViewModel model = new CreateShiftViewModel()
+            {
+                StartDate = DateOnly.FromDateTime(DateTime.Now),
+                EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1))
+            };
+
+            foreach (var t in teams) 
+            {
+                TeamInCreateShiftViewModel tcsvm = new TeamInCreateShiftViewModel()
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    isSelected = false
+                };
+                model.Teams.Add(tcsvm);
+            }
+            foreach(var w in workers)
+            {
+                WorkerInCreateShiftViewModel wcsvm = new WorkerInCreateShiftViewModel()
+                {
+                    Id = w.Id,
+                    Name = w.ApplicationUser.Name + " " + w.ApplicationUser.Surname,
+                    Email = w.ApplicationUser.Email,
+                    isSelected = false
+                };
+                model.Workers.Add(wcsvm);
+            }
+
             ViewBag.Company = company;
 
-            return View();
+            
+
+            return View(model);
         }
 
         [HttpPost]
@@ -160,6 +193,74 @@ namespace GateKeeperV1.Controllers
 
             // Redirect to the index page after successfully creating the shift
             return RedirectToAction("Index");
+        }
+
+
+        
+        [HttpPost]
+        public async Task<IActionResult> UpdateWorkers([FromBody] UpdateTablesRequestViewModel request)
+        {
+
+            var selectedWorkers = request.SelectedWorkers; // Contains all workers with their selection status
+            var selectedTeams = request.SelectedTeams;     // Teams selected by the user
+            
+            foreach (var team in selectedTeams.Where(t => t.isSelected))
+            {
+                // Retrieve all workers belonging to the current team
+                var teamWorkers = await dbContext.WorkersTeams
+                    .Include(t => t.TeamMemberships)
+                    .Where(t => t.Id == team.Id)
+                    .SelectMany(t => t.TeamMemberships)
+                    .ToListAsync();
+
+                // Mark workers in the current team as selected
+                foreach (var tw in teamWorkers) 
+                {
+                    var worker = selectedWorkers.Where(sw => sw.Id == tw.WorkerId).FirstOrDefault();
+
+                    if (worker != null) 
+                    {
+                        worker.isSelected = true;
+                    }
+                }
+            }
+            return PartialView("_WorkersTable", selectedWorkers);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateTeams([FromBody] UpdateTablesRequestViewModel request)
+        {
+            var selectedWorkers = request.SelectedWorkers;
+            var selectedTeams = request.SelectedTeams;
+
+            foreach (var team in selectedTeams)
+            {
+                var teamWorkers = await dbContext.WorkersTeams
+                    .Include(t => t.TeamMemberships)
+                    .Where(t => t.Id == team.Id)
+                    .SelectMany(t => t.TeamMemberships)
+                    .ToListAsync();
+
+                team.isSelected = false;
+                int selectedWorkersCount= 0;
+
+                foreach(var tw in teamWorkers)
+                {
+                    if(selectedWorkers.Any(sw => sw.Id == tw.WorkerId && sw.isSelected))
+                    {
+                        selectedWorkersCount++;
+                    }
+                }
+
+                if(selectedWorkersCount == teamWorkers.Count())
+                {
+                    team.isSelected = true;
+                }
+            }
+
+            // Return the updated partial view for teams
+            return PartialView("_TeamsTable", selectedTeams);
         }
 
     }

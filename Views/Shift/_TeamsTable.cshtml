@@ -1,0 +1,25 @@
+﻿@model List<TeamInCreateShiftViewModel>
+
+<h3>Equipas</h3>
+<table class="table" id="createShiftTeamTable">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>
+                    <span class="team-name">@t.Name</span>
+                    <span class="d-none">@t.Id</span>
+                </td>
+                <td>
+                    <input class="form-check-input selected-worker-checkbox team-checkbox" type="checkbox" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

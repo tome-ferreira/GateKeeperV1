@@ -1,0 +1,132 @@
+﻿@model WorkersTeam
+@{
+    ViewBag.Title = "Criar equipa de trabalhadores";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    var user = await userManager.GetUserAsync(User);
+}
+
+<div class="containner">
+    <div class="row">
+        @if (ViewBag.Error != null)
+        {
+            <div class="text-danger">@ViewBag.Error</div>
+        }
+
+        <div class="col-md-12">
+            <h1>Detalhes da equipa</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3><strong>Nome: </strong>@Model.Name</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>@Model.Description</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Trabalhadores</h3>
+            <table class="table" id="teamDetailsTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Cargo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var worker in Model.TeamMemberships)
+                    {
+                        <tr>
+                            <td>
+                                @worker.Worker.ApplicationUser.Name @worker.Worker.ApplicationUser.Surname
+                            </td>
+                            <td>
+                                @worker.Worker.ApplicationUser.Email
+                            </td>
+                            <td>
+                                @if (worker.Worker.Role == "Admin")
+                                {
+                                    <span>Administração</span>
+                                }
+                                else if (worker.Worker.Role == "HR")
+                                {
+                                    <span>Recursos Humanos</span>
+                                }
+                                else if (worker.Worker.Role == "Worker")
+                                {
+                                    <span>Trabalhador</span>
+                                }
+                                else
+                                {
+                                    <span>Erro</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a class="btn btn-primary" asp-action="ListTeams" asp-controller="Worker" asp-route-TeamId="@Model.Id">Voltar</a>
+    @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
+    {
+        <a class="btn btn-primary" asp-action="EditTeam" asp-controller="Worker" asp-route-TeamId="@Model.Id">Editar equipa</a>
+        @if (Model.TeamMemberships.Any())
+        {
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Apagar equipa
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModalApagar">
+                Apagar equipa
+            </button>
+           
+            
+        }
+
+        <!-- Modal apagar -->
+        <div class="modal fade" id="exampleModalApagar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Tem a certeza?</h5>
+
+                    </div>
+                    <div class="modal-body">
+                        Tem a certeza que deseja apagar esta equipa? Esta ação é irreversível.
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-danger" asp-action="DeleteTeam" asp-controller="Worker" asp-route-Id="@Model.Id">Apagar equipa</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Impossível apagar</h5>
+                        
+                    </div>
+                    <div class="modal-body">
+                        Não é possivel apagar uma equipa com trabalhadores. Por favor remova todos os trabalhadores da equipa antes de a apagar.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Compreendi</button>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    
+</div>

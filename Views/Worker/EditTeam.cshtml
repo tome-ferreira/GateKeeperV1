@@ -1,12 +1,12 @@
-﻿@model CreateTeamViewModel
+﻿@model EditTeamViewModel
 @{
-    ViewBag.Title = "Criar equipa de trabalhadores";
+    ViewBag.Title = "Editar equipa de trabalhadores";
     Layout = "~/Views/Shared/_LayoutClient.cshtml";
     var user = await userManager.GetUserAsync(User);
 }
 
 <div class="containner">
-    <h1>Criar equipa de trabalhadores</h1>
+    <h1>Editar equipa de trabalhadores</h1>
 
     @if (ViewBag.NameError != null)
     {
@@ -17,7 +17,8 @@
         <p class="text-danger">@ViewBag.WorkersError</p>
     }
 
-    <form asp-action="CreateTeam" asp-controller="Worker" method="post">
+    <form asp-action="EditTeam" asp-controller="Worker" method="post">
+        <input type="hidden" asp-for="Id" />
         <div class="row">
             <div class="col-md-12">
                 <label asp-for="Name"></label>
@@ -29,7 +30,7 @@
         <div class="row">
             <div class="col-md-12">
                 <label asp-for="Description"></label>
-                <input asp-for="Description" class="form-control"  />
+                <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
@@ -88,7 +89,7 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Criar</button>
+        <button type="submit" class="btn btn-primary">Guardar alterações</button>
 
     </form>
 </div>

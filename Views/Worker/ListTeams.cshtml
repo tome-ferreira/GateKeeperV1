@@ -1,0 +1,45 @@
+﻿@model List<WorkersTeam>
+@{
+    ViewBag.Title = "Equipas de trabalhadores";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    var user = await userManager.GetUserAsync(User);
+}
+
+<div class="containner">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Equipas de trabalhadores</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            
+            <table class="table" id="teamDetailsTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Trabalhadores</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var Wt in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Wt.Name
+                            </td>
+                            <td>
+                                @Wt.TeamMemberships.Count()
+                            </td>
+                            <td>
+                                <a asp-action="TeamDetails" asp-controller="Worker" asp-route-TeamId="@Wt.Id" class="btn btn-primary">Detalhes</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+</div>
