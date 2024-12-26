@@ -60,7 +60,7 @@ namespace GateKeeperV1.Controllers
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
 
-            var company = await dbContext.Companies.Include(c => c.Buildings).Where(c => c.Id.ToString() ==  companyId).FirstAsync();
+            var company = await dbContext.Companies.Include(c => c.Buildings).Where(c => c.Id.ToString() == companyId).FirstAsync();
 
             var teams = await dbContext.WorkersTeams.Include(t => t.TeamMemberships).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
             var workers = await dbContext.WorkerProfiles.Include(t => t.ApplicationUser).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
@@ -71,7 +71,7 @@ namespace GateKeeperV1.Controllers
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1))
             };
 
-            foreach (var t in teams) 
+            foreach (var t in teams)
             {
                 TeamInCreateShiftViewModel tcsvm = new TeamInCreateShiftViewModel()
                 {
@@ -81,7 +81,7 @@ namespace GateKeeperV1.Controllers
                 };
                 model.Teams.Add(tcsvm);
             }
-            foreach(var w in workers)
+            foreach (var w in workers)
             {
                 WorkerInCreateShiftViewModel wcsvm = new WorkerInCreateShiftViewModel()
                 {
@@ -95,7 +95,7 @@ namespace GateKeeperV1.Controllers
 
             ViewBag.Company = company;
 
-            
+
 
             return View(model);
         }
@@ -107,18 +107,18 @@ namespace GateKeeperV1.Controllers
             {
                 return View(model);
             }
-
+             
             var shift = new Shift
             {
                 Name = model.Name,
                 Description = model.Description,
                 Starts = model.Starts,
                 Ends = model.Ends,
-                IsOvernight = model.IsOvernight,  
-                BuildingId = model.BuildingId,    
+                IsOvernight = model.IsOvernight,
+                BuildingId = model.BuildingId,
             };
 
-           
+
             List<ShiftDays> shiftDaysList = new List<ShiftDays>();
 
             // Check if the shift is repetitive
@@ -196,14 +196,14 @@ namespace GateKeeperV1.Controllers
         }
 
 
-        
+
         [HttpPost]
         public async Task<IActionResult> UpdateWorkers([FromBody] UpdateTablesRequestViewModel request)
         {
 
             var selectedWorkers = request.SelectedWorkers; // Contains all workers with their selection status
             var selectedTeams = request.SelectedTeams;     // Teams selected by the user
-            
+
             foreach (var team in selectedTeams.Where(t => t.isSelected))
             {
                 // Retrieve all workers belonging to the current team
@@ -214,11 +214,11 @@ namespace GateKeeperV1.Controllers
                     .ToListAsync();
 
                 // Mark workers in the current team as selected
-                foreach (var tw in teamWorkers) 
+                foreach (var tw in teamWorkers)
                 {
                     var worker = selectedWorkers.Where(sw => sw.Id == tw.WorkerId).FirstOrDefault();
 
-                    if (worker != null) 
+                    if (worker != null)
                     {
                         worker.isSelected = true;
                     }
@@ -228,40 +228,5 @@ namespace GateKeeperV1.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> UpdateTeams([FromBody] UpdateTablesRequestViewModel request)
-        {
-            var selectedWorkers = request.SelectedWorkers;
-            var selectedTeams = request.SelectedTeams;
-
-            foreach (var team in selectedTeams)
-            {
-                var teamWorkers = await dbContext.WorkersTeams
-                    .Include(t => t.TeamMemberships)
-                    .Where(t => t.Id == team.Id)
-                    .SelectMany(t => t.TeamMemberships)
-                    .ToListAsync();
-
-                team.isSelected = false;
-                int selectedWorkersCount= 0;
-
-                foreach(var tw in teamWorkers)
-                {
-                    if(selectedWorkers.Any(sw => sw.Id == tw.WorkerId && sw.isSelected))
-                    {
-                        selectedWorkersCount++;
-                    }
-                }
-
-                if(selectedWorkersCount == teamWorkers.Count())
-                {
-                    team.isSelected = true;
-                }
-            }
-
-            // Return the updated partial view for teams
-            return PartialView("_TeamsTable", selectedTeams);
-        }
-
-    }
+    }  
 }

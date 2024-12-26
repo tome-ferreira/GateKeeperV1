@@ -9,6 +9,7 @@
         public DateTime Starts { get; set; }
         public DateTime Ends { get; set; }
         public string? Notes { get; set; }
+        public string Status { get; set; } = string.Empty;
 
         // Navigation properties
         public Company Company { get; set; }      // Each OffdayVacationRequest belongs to one Company

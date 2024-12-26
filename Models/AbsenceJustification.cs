@@ -9,6 +9,7 @@
         public DateTime AbsenceStarted { get; set; }
         public DateTime AbsenceFinished { get; set; }
         public string Justification { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
 
         // Navigation properties
         public WorkerProfile Worker { get; set; }   // One-to-many: WorkerProfile -> AbsenceJustifications

@@ -164,7 +164,7 @@
     $('#createShiftTeamTable').on('change', '.team-checkbox', function () {
         updateTableWorker();
     });
-
+    /*
     function updateTableTeam() {
         // Get trabalhadores selecionados 
         const selectedWorkers = [];
@@ -200,7 +200,7 @@
 
         // Ativar o AJAX
         updateTeams(selectedWorkers, selectedTeams);
-    }
+    }*/
 
     function updateTableWorker() {
         // Get trabalhadores selecionados 
@@ -237,6 +237,7 @@
 
         // Ativar o AJAX
         updateWorkers(selectedWorkers, selectedTeams);
+        reattachEventListeners();
     }
 
     function updateWorkers(selectedWorkers, selectedTeams) {
@@ -260,6 +261,7 @@
         });
     }
 
+    /*
     function updateTeams(selectedWorkers, selectedTeams) {
         $.ajax({
             url: '/Shift/UpdateTeams', 
@@ -278,7 +280,7 @@
                 console.error('Error updating teams:', error);
             }
         });
-    }
+    }*/
 
     function restartWorkersTable() {
         $('#createShiftWorkerTable').DataTable().destroy();
@@ -320,6 +322,7 @@
         });
     }
 
+    /*
     function restartTeamsTable() {
         $('#createShiftTeamTable').dataTable().destroy();
         //$('#createShiftTeamTable').dataTable(createShiftTeamTableConfig);
@@ -359,6 +362,29 @@
             }
         });
 
+    }*/
+
+
+
+
+
+
+
+    function reattachEventListeners() {
+        const teamCheckboxes = document.querySelectorAll('.team-checkbox');
+        const workerCheckboxes = document.querySelectorAll('.worker-checkbox');
+
+        function handleTeamCheckboxChange() {
+            const anyTeamChecked = Array.from(teamCheckboxes).some(checkbox => checkbox.checked);
+
+            workerCheckboxes.forEach(workerCheckbox => {
+                workerCheckbox.disabled = anyTeamChecked;
+            });
+        }
+
+        teamCheckboxes.forEach(teamCheckbox => {
+            teamCheckbox.addEventListener('change', handleTeamCheckboxChange);
+        });
     }
 });
 

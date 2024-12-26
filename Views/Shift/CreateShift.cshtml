@@ -143,9 +143,11 @@
         </div>
         <!----------------->
 
-        <button type="submit" class="btn btn-primary">Criar turno</button>
+        <button type="submit" id="submitButton" class="btn btn-primary">Criar turno</button>
     </form>
 </div>
+
+
 
 <!-- Modal Popup -->
 <div id="timeModal" class="modal" tabindex="-1" role="dialog" style="display:none;">
@@ -180,9 +182,31 @@
 </div>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Select all team checkboxes and worker checkboxes
+        const teamCheckboxes = document.querySelectorAll('.team-checkbox');
+        const workerCheckboxes = document.querySelectorAll('.worker-checkbox');
 
+        // Function to handle enabling/disabling worker checkboxes
+        function handleTeamCheckboxChange() {
+            const anyTeamChecked = Array.from(teamCheckboxes).some(checkbox => checkbox.checked);
 
+            // Disable worker checkboxes if any team checkbox is checked, otherwise enable them
+            workerCheckboxes.forEach(workerCheckbox => {
+                workerCheckbox.disabled = anyTeamChecked;
+            });
+        }
 
+        // Attach event listeners to team checkboxes
+        teamCheckboxes.forEach(teamCheckbox => {
+            teamCheckbox.addEventListener('change', handleTeamCheckboxChange);
+        });
+    });
+
+</script>
+
+    
 
 <script>
     function toggleRepetitiveOptions() {
