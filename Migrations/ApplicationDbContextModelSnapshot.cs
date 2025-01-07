@@ -217,27 +217,12 @@ namespace GateKeeperV1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("BuildingsN")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("BuildingsNUnlimited")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("DashboardAccounts")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("DashboardAccountsUnlimited")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("HasExcel")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -247,12 +232,6 @@ namespace GateKeeperV1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RegistsPerMonth")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("RegistsPerMonthUnlimited")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -260,12 +239,6 @@ namespace GateKeeperV1.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Workers")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("WorkersUnlimited")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -316,11 +289,14 @@ namespace GateKeeperV1.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ShiftId")
+                    b.Property<Guid?>("ShiftId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("WorkerId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("isEntrance")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -378,7 +354,7 @@ namespace GateKeeperV1.Migrations
                     b.Property<Guid>("BuildingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CompanyId")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -387,6 +363,9 @@ namespace GateKeeperV1.Migrations
                     b.Property<TimeOnly>("Ends")
                         .HasColumnType("time");
 
+                    b.Property<DateTime>("EndsDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsOvernight")
                         .HasColumnType("bit");
 
@@ -394,14 +373,22 @@ namespace GateKeeperV1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("ShiftLeaderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<TimeOnly>("Starts")
                         .HasColumnType("time");
+
+                    b.Property<DateTime>("StartsDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BuildingId");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("ShiftLeaderId");
 
                     b.ToTable("Shifts");
                 });
@@ -412,20 +399,43 @@ namespace GateKeeperV1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("EndDateTime")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("ShiftId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("StartDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("isOvernight")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ShiftId");
 
                     b.ToTable("ShiftDays");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.ShiftDaysOfWeek", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ShiftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("isOvernight")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShiftId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("ShiftDaysOfWeeks");
                 });
 
             modelBuilder.Entity("GateKeeperV1.Models.WorkerProfile", b =>
@@ -715,10 +725,9 @@ namespace GateKeeperV1.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("GateKeeperV1.Models.Shift", "Shift")
-                        .WithMany()
+                        .WithMany("Movements")
                         .HasForeignKey("ShiftId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("GateKeeperV1.Models.WorkerProfile", "Worker")
                         .WithMany("Movements")
@@ -761,9 +770,18 @@ namespace GateKeeperV1.Migrations
                     b.HasOne("GateKeeperV1.Models.Company", null)
                         .WithMany("Shifts")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GateKeeperV1.Models.WorkerProfile", "ShiftLeader")
+                        .WithMany("LeaderOfShifts")
+                        .HasForeignKey("ShiftLeaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Building");
+
+                    b.Navigation("ShiftLeader");
                 });
 
             modelBuilder.Entity("GateKeeperV1.Models.ShiftDays", b =>
@@ -772,6 +790,17 @@ namespace GateKeeperV1.Migrations
                         .WithMany("ShiftDays")
                         .HasForeignKey("ShiftId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Shift");
+                });
+
+            modelBuilder.Entity("GateKeeperV1.Models.ShiftDaysOfWeek", b =>
+                {
+                    b.HasOne("GateKeeperV1.Models.Shift", "Shift")
+                        .WithMany("ShiftDaysOfWeeks")
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Shift");
@@ -934,7 +963,11 @@ namespace GateKeeperV1.Migrations
 
             modelBuilder.Entity("GateKeeperV1.Models.Shift", b =>
                 {
+                    b.Navigation("Movements");
+
                     b.Navigation("ShiftDays");
+
+                    b.Navigation("ShiftDaysOfWeeks");
 
                     b.Navigation("WorkerShifts");
                 });
@@ -942,6 +975,8 @@ namespace GateKeeperV1.Migrations
             modelBuilder.Entity("GateKeeperV1.Models.WorkerProfile", b =>
                 {
                     b.Navigation("AbsenceJustifications");
+
+                    b.Navigation("LeaderOfShifts");
 
                     b.Navigation("Movements");
 

@@ -1,11 +1,12 @@
 ﻿@model IEnumerable<ApplicationUser>
 
 @{
-    ViewBag.Title = "Application users";
+    ViewBag.Title = "Utilizadores";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
 <div class="container">
-    <h1>Application users</h1>
+    <h1>Utilizadores</h1>
 
     <a class="btn btn-primary" asp-action="Register" asp-controller="Account">Create new user</a>
 
@@ -21,10 +22,10 @@
                         Name
                     </td>
                     <td>
-                        Active projects
+                        Projetos ativos
                     </td>
                     <td>
-                        Active requests
+                        Pedidos ativos
                     </td>
                     <td>
 
@@ -65,6 +66,6 @@
     }
     else
     {
-        <h4>No users created yet</h4>
+        <h4>Nenhum utilizador de momento</h4>
     }
 </div>

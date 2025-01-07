@@ -118,14 +118,41 @@
         </div>
 
         <div class="row mt-3">
-            <!--CARREGAR TABELA DE EQUIPAS ATRAVÉS DE UM PARTIAL-->
-            <div class="col-md-5" id="teamTableContainer">
-                @Html.Partial("_TeamsTable", Model.Teams)
-            </div>
+            
+            <div class="col-md-7" id="workerTableContainer">
+                <h3>Trabalhadores</h3>
+                <table class="table" id="createShiftWorkerTable">
+                    <thead>
+                        <tr>
+                            <th>Trabalhador</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Workers.Count; i++)
+                        {
+                            <tr>
+                                <input type="hidden" asp-for="@Model.Workers[i].Id" class="worker-id" />
+                                <td>
+                                    <input type="hidden" asp-for="@Model.Workers[i].Name" class="worker-name" />
+                                    @Model.Workers[i].Name <br /><span class="worker-email"> @Model.Workers[i].Email</span>
+                                </td>
 
-            <!--CARREGAR TABELA DE TRABALHADORES ATRAVÉS DE UM PARTIAL-->
-            <div class="col-md-6" id="workerTableContainer">
-                @Html.Partial("_WorkersTable", Model.Workers)
+                                <td>
+                                    <input asp-for="@Model.Workers[i].isSelected"
+                                           class="form-check-input selected-worker-checkbox worker-checkbox"
+                                           onchange="updateShiftLeaderDropdown()" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <h3>Líder do turno</h3>
+                <select id="shiftLeaderDropdown" class="form-select" asp-for="LeaderId" >
+                    <option value="" selected>Selecione um líder</option>
+                </select>
             </div>
         </div>
 
@@ -143,7 +170,7 @@
         </div>
         <!----------------->
 
-        <button type="submit" id="submitButton" class="btn btn-primary">Criar turno</button>
+        <button type="submit" id="submitButton" class="btn btn-primary mt-3">Criar turno</button>
     </form>
 </div>
 
@@ -209,6 +236,29 @@
     
 
 <script>
+    function updateShiftLeaderDropdown() {
+        const dropdown = document.getElementById('shiftLeaderDropdown');
+        const rows = document.querySelectorAll('#createShiftWorkerTable tbody tr');
+
+        // Clear existing options
+        dropdown.innerHTML = '<option value="" selected>Selecione um líder</option>';
+
+        rows.forEach(row => {
+            const checkbox = row.querySelector('.worker-checkbox');
+            if (checkbox.checked) {
+                const workerId = row.querySelector('.worker-id').value;
+                const workerName = row.querySelector('.worker-name').value;
+
+                // Create and append the new option
+                const option = document.createElement('option');
+                option.value = workerId;
+                option.textContent = workerName;
+                dropdown.appendChild(option);
+            }
+        });
+    }
+
+
     function toggleRepetitiveOptions() {
         var isRepetitive = document.getElementById("IsRepetitive").checked;
         var daysCheckboxes = document.querySelectorAll(".day-checkbox");

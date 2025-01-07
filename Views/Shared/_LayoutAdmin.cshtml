@@ -1,0 +1,56 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<!-- ======= Header ======= -->
+<header id="header" class="header fixed-top d-flex align-items-center top-navbar">
+
+    <div class="d-flex align-items-center justify-content-between">
+        <a asp-action="Index" asp-controller="Home" class="logo d-flex align-items-center">
+            <img src="/img/logos/logoBigWhiteText.png" alt="Logo" class="top-nav-bar-logo" style="height: 100px">
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn text-white"></i>
+    </div>
+
+
+
+
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+            
+            <li class="nav-item dropdown pe-3">
+                <a href="#" onclick="logout()">
+                    <i class='bx bx-log-out-circle text-white'></i> <span class="icon-text text-white">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</header>
+
+
+<!-- ======= Sidebar ======= -->
+<aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link side-navbar-item" asp-action="ListUsers" asp-controller="Administration">
+                <i class='bx bx-user text-gatekeeper-green'></i>
+                <span>Gerir utilizadores</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link side-navbar-item" asp-action="ListRequest" asp-controller="Administration">
+                <i class='bx bx-money-withdraw text-gatekeeper-green'></i>
+                <span>Gerir pedidos Enterprise</span>
+            </a>
+        </li>
+    </ul>
+</aside>
+<!-- ======================= -->
+
+<main id="main" class="main">
+    <div>
+        @RenderBody()
+    </div>
+</main>

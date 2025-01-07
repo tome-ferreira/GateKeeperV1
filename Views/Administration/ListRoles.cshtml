@@ -1,27 +1,28 @@
 ﻿@model IEnumerable<IdentityRole>
 
 @{
-    ViewBag.Tilte = "All Roles";
+    ViewBag.Title = "Cargos";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
 <div class="container">
-    <h1>All Roles</h1>
+    <h1>Todos os cargos</h1>
     @if (Model.Any())
     {
-        <a class="btn btn-primary mb-3" asp-action="CreateRole" asp-controller="Administration">Add new role</a>
+        <a class="btn btn-primary mb-3" asp-action="CreateRole" asp-controller="Administration">Criar cargo</a>
         
         foreach(var role in Model)
         {
             <div class="card mb-3">
                 <div class="card-header">
-                    Role ID: @role.Id
+                    Cargo ID: @role.Id
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">@role.Name</h5>
                 </div>
                 <div class="card-footer">
-                    <a asp-action="EditRole" asp-controller="Administration" asp-route-id="@role.Id" class="btn btn-primary">Edit</a>
-                    <a asp-action="DeleteRole" asp-controller="Administration" asp-route-id="@role.Id" class="btn btn-danger">Delete</a>
+                    <a asp-action="EditRole" asp-controller="Administration" asp-route-id="@role.Id" class="btn btn-primary">Editar</a>
+                    <a asp-action="DeleteRole" asp-controller="Administration" asp-route-id="@role.Id" class="btn btn-danger">Apagar</a>
                 </div>
             </div>
         }
@@ -30,14 +31,14 @@
     {
         <div class="card">
             <div class="card-header">
-                No roles created yet
+                Nenhum cargo criado
             </div>
             <div class="card-body">
                 <h5 class="card-title">
-                    Use the button below to create a role
+                    
                 </h5>
                 <a class="btn btn-primary" style="width:auto" asp-action="CreateRole" asp-controller="Administration">
-                    Create Role
+                    Criar cargo
                 </a>
             </div>
         </div>

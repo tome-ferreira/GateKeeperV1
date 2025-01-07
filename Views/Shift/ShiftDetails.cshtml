@@ -1,0 +1,82 @@
+﻿@model Shift
+@{
+    ViewBag.Title = "Detalhes do Turno";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+
+    var dayTranslations = new Dictionary<int, string>
+    {
+        { 1, "Domingo" },
+        { 2, "Segunda-feira" },
+        { 3, "Terça-feira" },
+        { 4, "Quarta-feira" },
+        { 5, "Quinta-feira" },
+        { 6, "Sexta-feira" },
+        { 7, "Sábado" }
+    };
+}
+
+<div class="container">
+    <h1>Detalhes do Turno</h1>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h3>Informações do Turno</h3>
+            <p><strong>Nome:</strong> @Model.Name</p>
+            <p><strong>Descrição:</strong> @Model.Description</p>
+            <p><strong>Horário:</strong> @Model.Starts.ToString("HH:mm") - @Model.Ends.ToString("HH:mm")</p>
+            <p><strong>Noturno:</strong> @(Model.IsOvernight ? "Sim" : "Não")</p>
+            <p><strong>Edifício:</strong> @Model.Building.Name</p>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h3>Repetição</h3>
+            @if (Model.ShiftDaysOfWeeks.Any())
+            {
+                <p>
+                    <strong>Dias:</strong>
+                    @foreach (var day in Model.ShiftDaysOfWeeks)
+                    {
+                        @dayTranslations[day.DayOfWeek] @(" ")
+
+                    }
+                </p>
+                <p><strong>Data de início:</strong> @Model.StartsDate.ToString("dd/MM/yyyy")</p>
+                <p><strong>Data de fim:</strong> @Model.EndsDate.ToString("dd/MM/yyyy")</p>
+            }
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h3>Trabalhadores</h3>
+            <table class="table" id="shiftsTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Líder</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var worker in Model.WorkerShifts)
+                    {
+                        <tr>
+                            <td>@worker.Worker.ApplicationUser.Name @worker.Worker.ApplicationUser.Surname</td>
+                            <td>@worker.Worker.ApplicationUser.Email</td>
+                            <td>@(worker.Worker.Id == Model.ShiftLeaderId ? "Sim" : "Não")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <a asp-action="EditShift" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+</div>

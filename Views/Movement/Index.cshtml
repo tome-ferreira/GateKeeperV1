@@ -1,0 +1,61 @@
+﻿@model List<DateTime>
+
+@{
+    ViewBag.Title = "Movimentos";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div class="containner">
+    <div class="backgroud-filter">
+        <div class="row">
+            <h1>Movimentos</h1>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <select id="dateDropDown" name="Marca" class="form-control">
+                    @foreach (var day in Model)
+                    {
+                        <option value="@day">@day.ToString("dd/MM/yyyy")</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="partialContainner">
+
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var selectedDate = $('#dateDropDown').val();
+
+
+        loadMovementsTable(selectedDate);
+
+
+        $('#dateDropDown').change(function () {
+            console.log('detetou mudança');
+            var selectedDate = $(this).val();
+            loadMovementsTable(selectedDate);
+        });
+
+        function loadMovementsTable(date) {
+            console.log('Chegou ao ajax');
+            $.ajax({
+                url: '@Url.Action("GetMovementsTablePartial", "Movement")',
+                type: 'GET',
+                data: { date: date },
+                success: function (response) {
+                    $('#partialContainner').html(response);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading movements table: " + error);
+                }
+            });
+        }
+    });
+
+</script>
+

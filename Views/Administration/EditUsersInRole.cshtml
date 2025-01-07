@@ -1,17 +1,20 @@
 ﻿@model List<UserRoleViewModel>
 
 @{
-    ViewData["Title"] = "Edit Role";
+    ViewBag.Title = "Editar cargo";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var roleId = ViewBag.roleId;
-  
 }
+
+ 
+
 
 <div class="container">
     <div class="containner">
         <form method="post">
             <div class="card" style="background-color: transparent">
                 <div class="card-header">
-                    <h2>Add or remove users from this role</h2>
+                    <h2>Adicionar ou remover utilizadores do cargo</h2>
                 </div>
                 <div class="card-body">
                     @for (int i = 0; i < Model.Count; i++)
@@ -30,7 +33,7 @@
                     <input type="submit" value="Update" class="btn btn-primary"
                            style="width:auto; border-radius: 10px;" />
                     <a asp-action="EditRole" style="border-radius: 10px;" asp-route-id="@roleId"
-                       class="btn btn-primary" style="width:auto">Cancel</a>
+                       class="btn btn-primary" style="width:auto">Cancelar</a>
                 </div>
             </div>
         </form>

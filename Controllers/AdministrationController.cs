@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using GateKeeperV1.Models;
 using GateKeeperV1.ViewModels;
+using GateKeeperV1.Data;
 
 namespace GateKeeperV1.Controllers
 {
@@ -13,11 +14,13 @@ namespace GateKeeperV1.Controllers
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly ApplicationDbContext dbContext;
 
-        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext dbContext)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
+            this.dbContext = dbContext;
         }
 
 
@@ -389,6 +392,39 @@ namespace GateKeeperV1.Controllers
 
                 return View("ListUsers");
             }
+        }
+
+
+
+
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ListRequest()
+        {
+            var requests = await dbContext.EnterpirseRequests.Include(e => e.User).ToListAsync();
+
+            return View(requests);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReviewRequest(Guid id)
+        {
+            var request = await dbContext.EnterpirseRequests.Include(e => e.User).Where(e => e.Id == id).FirstOrDefaultAsync();
+
+            ReviewRequestViewModel model = new ReviewRequestViewModel
+            {
+                Name = request.Name,
+                Description = request.Description,
+                Password = request.Password,
+                Salt = request.Salt,
+                creatorEmail = request.User.Email
+            };
+
+            return View(model);
         }
     }
 }

@@ -75,6 +75,78 @@
         }
     });
 
+
+    //definições da tabela em Shifts/Index
+    let shiftsTable = new DataTable('#shiftsTable', {
+        paging: true,
+        searching: true,
+        columnDefs: [
+            {
+                targets: -1,
+                searchable: false
+            }
+        ],
+        language: {
+            "decimal": ",",
+            "thousands": ".",
+            "lengthMenu": "Mostrar _MENU_ registos por página",
+            "zeroRecords": "Nenhum registo encontrado",
+            "info": "A mostrar _START_ a _END_ de _TOTAL_ registos",
+            "infoEmpty": "A mostrar 0 a 0 de 0 registos",
+            "infoFiltered": "(filtrado de _MAX_ registos no total)",
+            "search": "Procurar:",
+            "paginate": {
+                "first": "Primeiro",
+                "last": "Último",
+                "next": "Seguinte",
+                "previous": "Anterior"
+            },
+            "emptyTable": "Sem dados disponíveis na tabela",
+            "loadingRecords": "A carregar...",
+            "processing": "A processar...",
+            "aria": {
+                "sortAscending": ": ativar para ordenar a coluna de forma ascendente",
+                "sortDescending": ": ativar para ordenar a coluna de forma descendente"
+            }
+        }
+    });
+
+
+    //definições da tabela em AbsensseJustification/ListAbsensseJustifications
+    let ajTable = new DataTable('#ajTable', {
+        paging: true,
+        searching: true,
+        columnDefs: [
+            {
+                targets: -1,
+                searchable: false
+            }
+        ],
+        language: {
+            "decimal": ",",
+            "thousands": ".",
+            "lengthMenu": "Mostrar _MENU_ registos por página",
+            "zeroRecords": "Nenhum registo encontrado",
+            "info": "A mostrar _START_ a _END_ de _TOTAL_ registos",
+            "infoEmpty": "A mostrar 0 a 0 de 0 registos",
+            "infoFiltered": "(filtrado de _MAX_ registos no total)",
+            "search": "Procurar:",
+            "paginate": {
+                "first": "Primeiro",
+                "last": "Último",
+                "next": "Seguinte",
+                "previous": "Anterior"
+            },
+            "emptyTable": "Sem dados disponíveis na tabela",
+            "loadingRecords": "A carregar...",
+            "processing": "A processar...",
+            "aria": {
+                "sortAscending": ": ativar para ordenar a coluna de forma ascendente",
+                "sortDescending": ": ativar para ordenar a coluna de forma descendente"
+            }
+        }
+    });
+
     //definições da tabela equipas em Shift/_TeamsTable 
     let createShiftTeamTableConfig = new DataTable('#createShiftTeamTable', {
         scrollY: '400px',

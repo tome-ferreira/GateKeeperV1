@@ -3,8 +3,8 @@
     public class ShiftDays
     {
         public Guid Id { get; set; }
-        public DateTime StartDateTime { get; set; }  // Specific start time of this occurrence
-        public DateTime EndDateTime { get; set; }    // Specific end time, allowing shifts that span two days
+        public DateTime Date { get; set; }
+        public bool isOvernight { get; set; }
 
 
         // Foreign Key

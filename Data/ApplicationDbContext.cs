@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using GateKeeperV1.Controllers;
 using GateKeeperV1.Models;
 
+
 namespace GateKeeperV1.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
@@ -26,6 +27,7 @@ namespace GateKeeperV1.Data
         public DbSet<ShiftDays> ShiftDays { get; set; }
         public DbSet<WorkersTeam> WorkersTeams { get; set; }
         public DbSet<WorkerTeamMembership> WorkerTeamMemberships { get; set; }
+        public DbSet<ShiftDaysOfWeek> ShiftDaysOfWeeks { get; set; }
 
 
 
@@ -66,6 +68,7 @@ namespace GateKeeperV1.Data
                 .HasForeignKey(b => b.CompanyId);
 
             // Define relationship between Movement and WorkerProfile
+            
             modelBuilder.Entity<Movement>()
                 .HasOne(m => m.Worker)
                 .WithMany(w => w.Movements)
@@ -154,8 +157,28 @@ namespace GateKeeperV1.Data
                 .HasOne(wt => wt.Company)           
                 .WithMany(c => c.Teams)             
                 .HasForeignKey(wt => wt.CompanyId)  
-                .OnDelete(DeleteBehavior.Cascade);  
+                .OnDelete(DeleteBehavior.Cascade);
 
+
+
+            // Unique constraint for repetitive shift days (ShiftId + DayOfWeek)
+            modelBuilder.Entity<ShiftDaysOfWeek>()
+                .HasIndex(sd => new { sd.ShiftId, sd.DayOfWeek })
+                .IsUnique();
+
+            // Configure one-to-many relationship for Shift and WorkerProfile (ShiftLeader)
+            modelBuilder.Entity<Shift>()
+                .HasOne(s => s.ShiftLeader)
+                .WithMany(w => w.LeaderOfShifts)
+                .HasForeignKey(s => s.ShiftLeaderId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevent cascading delete to preserve data integrit
+
+            // Configure one-to-many relationship for Shift and WorkerProfile (ShiftLeader)
+            modelBuilder.Entity<Movement>()
+                .HasOne(m => m.Shift)                     // A Movement optionally belongs to a Shift
+                .WithMany(s => s.Movements)               // A Shift can have 0 or many Movements
+                .HasForeignKey(m => m.ShiftId)            // Foreign key in Movement
+                .OnDelete(DeleteBehavior.Restrict);       // Prevent cascading delete
 
         }
 

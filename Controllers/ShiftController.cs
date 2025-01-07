@@ -32,20 +32,14 @@ namespace GateKeeperV1.Controllers
             var user = await userManager.GetUserAsync(User);
             var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin") || await functions.IsUserInCompanyRole(user.Id, "HR"); if (!canAcess) { return View("AcessDenied"); }
 
-            // Calculate the start and end dates for the current week
-            /*
-            DateTime today = DateTime.Today;
-            int daysUntilSunday = (int)today.DayOfWeek;
-            DateTime lastSunday = today.AddDays(-daysUntilSunday);
-            DateTime nextSaturday = lastSunday.AddDays(6);
+            var shifts = await dbContext.Shifts
+                .Include(s => s.WorkerShifts)
+                .Include(s => s.ShiftLeader)
+                .ThenInclude(sl => sl.ApplicationUser)
+                .Where(s => s.CompanyId.ToString() == companyId)
+                .ToListAsync();
 
-            // Query to get shifts from last Sunday to next Saturday
-            var shifts = await dbContext.ShiftDays
-                .Include(s => s.Shift)
-                .Where(s => s.DayOfWeek >= lastSunday && s.DayOfWeek <= nextSaturday)
-                .ToListAsync() ?? new List<ShiftDays>();*/
-
-            return View(/*shifts*/);
+            return View(shifts);
         }
 
         [HttpGet]
@@ -62,7 +56,7 @@ namespace GateKeeperV1.Controllers
 
             var company = await dbContext.Companies.Include(c => c.Buildings).Where(c => c.Id.ToString() == companyId).FirstAsync();
 
-            var teams = await dbContext.WorkersTeams.Include(t => t.TeamMemberships).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
+            //var teams = await dbContext.WorkersTeams.Include(t => t.TeamMemberships).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
             var workers = await dbContext.WorkerProfiles.Include(t => t.ApplicationUser).Where(t => t.CompanyId.ToString() == companyId).ToListAsync();
 
             CreateShiftViewModel model = new CreateShiftViewModel()
@@ -70,7 +64,7 @@ namespace GateKeeperV1.Controllers
                 StartDate = DateOnly.FromDateTime(DateTime.Now),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1))
             };
-
+            /*
             foreach (var t in teams)
             {
                 TeamInCreateShiftViewModel tcsvm = new TeamInCreateShiftViewModel()
@@ -80,7 +74,7 @@ namespace GateKeeperV1.Controllers
                     isSelected = false
                 };
                 model.Teams.Add(tcsvm);
-            }
+            }*/
             foreach (var w in workers)
             {
                 WorkerInCreateShiftViewModel wcsvm = new WorkerInCreateShiftViewModel()
@@ -103,11 +97,21 @@ namespace GateKeeperV1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShift(CreateShiftViewModel model)
         {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            /*
             if (!ModelState.IsValid)
             {
                 return View(model);
-            }
-             
+            }*/
+
             var shift = new Shift
             {
                 Name = model.Name,
@@ -116,82 +120,74 @@ namespace GateKeeperV1.Controllers
                 Ends = model.Ends,
                 IsOvernight = model.IsOvernight,
                 BuildingId = model.BuildingId,
+                CompanyId = Guid.Parse(companyId),
+                ShiftLeaderId = model.LeaderId,
+                StartsDate = model.StartDate.ToDateTime(TimeOnly.MinValue), 
+                EndsDate = model.EndDate.ToDateTime(TimeOnly.MinValue)
             };
-
+            await dbContext.Shifts.AddAsync(shift);
 
             List<ShiftDays> shiftDaysList = new List<ShiftDays>();
 
-            // Check if the shift is repetitive
+            // Processar os dias se o turno for repetitivo
             if (model.IsRepetitive)
             {
-                // Loop through each selected day in the Days list 
+                List<ShiftDaysOfWeek> shiftDaysOfWeeks = new List<ShiftDaysOfWeek>();
+
                 foreach (var day in model.Days)
                 {
-                    // Convert the string day (e.g., "Monday") to a DayOfWeek enum
-                    var selectedDay = Enum.Parse<DayOfWeek>(day);
-                    DateTime currentDate = DateTime.Now; // Start from today's date
-
-                    // Loop through each day up to the specified EndDate in the view model
-                    while (model.StartDate.ToDateTime(TimeOnly.MinValue) <= model.EndDate.ToDateTime(TimeOnly.MinValue))
+                    int dayNumber = day switch
                     {
-                        // Check if the current date matches the selected day of the week
-                        if (currentDate.DayOfWeek == selectedDay)
-                        {
-                            // Calculate the start date and time by combining the current date and shift start time
-                            var startDateTime = currentDate.Add(model.Starts.ToTimeSpan());
-
-                            // Calculate the end date and time:
-                            // If IsOvernight is true, the end time should be on the following day
-                            var endDateTime = model.IsOvernight
-                                ? startDateTime.Date.AddDays(1).Add(model.Ends.ToTimeSpan())
-                                : startDateTime.Date.Add(model.Ends.ToTimeSpan());
-
-                            // Add a new ShiftDays instance for each occurrence
-                            shiftDaysList.Add(new ShiftDays
-                            {
-                                ShiftId = shift.Id,    // Associate with the Shift
-                                StartDateTime = startDateTime,
-                                EndDateTime = endDateTime
-                            });
-                        }
-                        // Move to the next day in the date range
-                        currentDate = currentDate.AddDays(1);
-                    }
+                        "Sunday" => 1,
+                        "Monday" => 2,
+                        "Tuesday" => 3,
+                        "Wednesday" => 4,
+                        "Thursday" => 5,
+                        "Friday" => 6,
+                        "Saturday" => 7,
+                    };
+                    shiftDaysOfWeeks.Add(new ShiftDaysOfWeek()
+                    {
+                        DayOfWeek = dayNumber,
+                        isOvernight = model.IsOvernight,
+                        ShiftId = shift.Id
+                    });
                 }
+
+                await dbContext.ShiftDaysOfWeeks.AddRangeAsync(shiftDaysOfWeeks);
             }
             else
             {
-                // If the shift is not repetitive, add a single ShiftDays entry
-
-                // Calculate the start date and time by combining the specified EndDate and shift start time
-                var startDateTime = model.EndDate.ToDateTime(model.Starts);
-
-                // Calculate the end date and time:
-                // If IsOvernight is true, the end time should be on the following day
-                var endDateTime = model.IsOvernight
-                    ? startDateTime.Date.AddDays(1).Add(model.Ends.ToTimeSpan())
-                    : startDateTime.Date.Add(model.Ends.ToTimeSpan());
-
-                // Add a single ShiftDays instance for the non-repetitive shift
-                shiftDaysList.Add(new ShiftDays
+                ShiftDays shiftDay = new ShiftDays()
                 {
-                    Id = Guid.NewGuid(),
-                    ShiftId = shift.Id,    // Associate with the Shift
-                    StartDateTime = startDateTime,
-                    EndDateTime = endDateTime
+                    Date = model.EndDate.ToDateTime(model.Starts),
+                    isOvernight = model.IsOvernight,
+                    ShiftId  = shift.Id
+                };
+
+                await dbContext.ShiftDays.AddAsync(shiftDay);
+            }
+
+            List<WorkerShift> workers = new List<WorkerShift> ();
+
+            foreach(var w in model.Workers.Where(w => w.isSelected))
+            {
+                workers.Add(new WorkerShift()
+                {
+                    ShiftId = shift.Id,
+                    WorkerId = w.Id
                 });
             }
 
-            // Assign the list of ShiftDays to the Shift's ShiftDays collection
-            shift.ShiftDays = shiftDaysList;
+            
+            
+            await dbContext.WorkerShifts.AddRangeAsync(workers);
+            await dbContext.ShiftDays.AddRangeAsync(shiftDaysList);
 
-            // Add the new shift to the database context
-            dbContext.Shifts.Add(shift);
-
-            // Save the changes asynchronously
+            
             await dbContext.SaveChangesAsync();
 
-            // Redirect to the index page after successfully creating the shift
+            
             return RedirectToAction("Index");
         }
 
@@ -226,6 +222,69 @@ namespace GateKeeperV1.Controllers
             }
             return PartialView("_WorkersTable", selectedWorkers);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ShiftDetails(Guid id)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var shift = await dbContext.Shifts
+                .Include(s => s.WorkerShifts)
+                .ThenInclude(ws => ws.Worker)
+                .ThenInclude(w => w.ApplicationUser)
+                .Include(s => s.ShiftDays)
+                .Include(s => s.ShiftDaysOfWeeks)
+                .Include(s => s.Building)
+                .Where(s => s.Id == id)
+                .FirstOrDefaultAsync();
+
+            return View(shift);
+                
+        }
+
+        /*
+        [HttpGet]
+        public async Task<IActionResult> EditShift(Guid id)
+        {
+            string? companyId = HttpContext.Session.GetString("companyId");
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return RedirectToAction("Index", "Client");
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            var canAcess = await functions.IsUserInCompanyRole(user.Id, "Admin"); if (!canAcess) { return View("AcessDenied"); }
+
+            var shift = await dbContext.Shifts
+                .Include(s => s.WorkerShifts)
+                .ThenInclude(ws => ws.Worker)
+                .ThenInclude(w => w.ApplicationUser)
+                .Include(s => s.ShiftDays)
+                .Include(s => s.ShiftDaysOfWeeks)
+                .Include(s => s.Building)
+                .Where(s => s.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (shift.ShiftDaysOfWeeks.Any())
+            {
+                EditShiftViewModel editShiftViewModel = new EditShiftViewModel()
+                {
+                    ShiftId = shift.Id,
+                    Name = shift.Name,
+                    Description = shift.Description,
+                    Starts = shift.Starts,
+                    Ends = shift.Ends,
+
+                };
+            }
+        }*/
 
 
     }  

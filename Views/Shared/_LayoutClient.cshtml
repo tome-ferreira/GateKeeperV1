@@ -18,11 +18,7 @@
 
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
-            <li class="nav-item dropdown pe-3">
-                <a class=" nav-link sidebar-item " asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
-                    <i class='bx bx-user text-white'></i> <span class="icon-text">Minha conta</span>
-                </a>
-            </li>
+            
             <li class="nav-item dropdown pe-3">
                 <a href="#" onclick="logout()">
                     <i class='bx bx-log-out-circle text-white'></i> <span class="icon-text text-white">Logout</span>
@@ -37,12 +33,24 @@
 <!-- ======= Sidebar ======= -->
 <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-        <li class="nav-item">
-            <a class="nav-link side-navbar-item" asp-action="Index" asp-controller="Dashboard">
-                <i class='bx bx-line-chart text-gatekeeper-green'></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
+        {
+            <li class="nav-item">
+                <a class="nav-link side-navbar-item" asp-action="Index" asp-controller="Dashboard">
+                    <i class='bx bx-line-chart text-gatekeeper-green'></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        }
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
+        {
+            <li class="nav-item">
+                <a class="nav-link side-navbar-item" asp-action="Index" asp-controller="Movement">
+                    <i class='bx bx-door-open text-gatekeeper-green'></i>
+                    <span>Movimentos</span>
+                </a>
+            </li>
+        }
         @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
         {
             <li class="nav-item text-gatekeeper-green">
@@ -70,19 +78,19 @@
         {
             <li class="nav-item text-gatekeeper-green">
                 <a class="nav-link collapsed" data-bs-target="#workersteams-nav" data-bs-toggle="collapse" href="#">
-                    <i class="bx bxs-group text-gatekeeper-green"></i><span class="important-black-text">Equipas</span><i class="bi bi-chevron-down ms-auto"></i>
+                    <i class="bx bxs-group text-gatekeeper-green"></i><span class="important-black-text">Turnos</span><i class="bi bi-chevron-down ms-auto"></i>
                 </a>
                 <ul id="workersteams-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                     <li>
-                        <a asp-action="ListTeams" asp-controller="Worker">
-                            <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Lista de Equipas</span>
+                        <a asp-action="Index" asp-controller="Shift">
+                            <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Lista de turnos</span>
                         </a>
                     </li>
                     @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin"))
                     {
                         <li>
-                            <a asp-action="CreateTeam" asp-controller="Worker">
-                                <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Criar Equipa</span>
+                            <a asp-action="CreateShift" asp-controller="Shift">
+                                <i class='bx bxs-circle text-gatekeeper-green'></i><span class="important-black-text">Adicionar turno</span>
                             </a>
                         </li>
                     }
@@ -107,6 +115,24 @@
                     </a>
                   </li>
                 </ul>
+            </li>
+        }
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
+        {
+            <li class="nav-item">
+                <a class="nav-link side-navbar-item" asp-action="ListAbessenceJustifications" asp-controller="AbessenseJustification">
+                    <i class='bx bx-user-minus text-gatekeeper-green'></i>
+                    <span>Justificações de faltas</span>
+                </a>
+            </li>
+        }
+        @if (await functions.IsUserInCompanyRoleView(user.Id, "Admin") || await functions.IsUserInCompanyRoleView(user.Id, "HR"))
+        {
+            <li class="nav-item">
+                <a class="nav-link side-navbar-item" asp-action="ListVacationRequests" asp-controller="VacationRequest">
+                    <i class='bx bxs-plane-alt text-gatekeeper-green'></i>
+                    <span>Pedidos de férias e folgas</span>
+                </a>
             </li>
         }
     </ul>

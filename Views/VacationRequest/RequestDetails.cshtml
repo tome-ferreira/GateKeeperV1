@@ -1,0 +1,58 @@
+﻿@model OffdayVacationRequest
+
+@{
+    ViewBag.Title = "Pedido de férias ou folga";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div class="container">
+    <h2>Pedido de férias ou folga</h2>
+
+    <div class="row mt-3">
+        <div col-md-4>
+            <h4>Trabalhador: @Model.Worker.ApplicationUser.Name @Model.Worker.ApplicationUser.Surname</h4>
+        </div>
+        <div col-md-4>
+            <h4>De: @Model.Starts.ToString("dd/MM/yyyy")</h4>
+        </div>
+        <div col-md-3>
+            <h4>Até: @Model.Ends.ToString("dd/MM/yyyy")</h4>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h4>@Model.Notes</h4>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div col-md-3>
+
+
+            @if (Model.Status == "Aproved")
+            {
+                <h4>Aprovada</h4>
+            }
+            else if (Model.Status == "WaitingRevision")
+            {
+                <h4>Espera revisão</h4>
+            }
+            else if (Model.Status == "Recused")
+            {
+                <h4>Recusada</h4>
+            }
+            else
+            {
+                <h4>@Model.Status</h4>
+            }
+        </div>
+        @if (Model.Status == "WaitingRevision")
+        {
+            <div col-md-4>
+                <a class="btn btn-primary" asp-action="AproveRequest" asp-controller="VacationRequest" asp-route-Id="@Model.Id">Aceitar pedido</a>
+            </div>
+            <div col-md-4>
+                <a class="btn btn-danger" asp-action="RejectRequest" asp-controller="VacationRequest" asp-route-Id="@Model.Id">Recusar pedido</a>
+            </div>
+        }
+    </div>
+</div>

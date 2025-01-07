@@ -1,0 +1,83 @@
+﻿@using GateKeeperV1.Dto
+@model List<ShiftWorkers>
+
+@foreach (var sw in Model)
+{
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <h3>@sw.ShiftName</h3>
+        </div>
+        <div class="col-md-5"></div>
+        <div class="col-md-3">
+            <button onclick="ExportToExcel('xlsx')" class="btn btn-primary">
+                <i class="fas fa-download" style="margin-right: 5px;"></i> Exportar em Excel
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <table class="table">
+            <!--
+            <thead>
+                <tr>
+                    <td>
+                        Trabalhador
+                    </td>
+                </tr>
+            </thead>-->
+            <tbody>
+                @if (sw.WorkerInOutMovs != null && sw.WorkerInOutMovs.Any())
+                {
+                    @foreach (var wiom in sw.WorkerInOutMovs)
+                    {
+                        <tr>
+                            <td>
+                                @wiom.WorkerNumber - @wiom.WorkerName
+                            </td>
+                            @if (wiom.EntranceExitGroups != null && wiom.EntranceExitGroups.Any())
+                            {
+                                @foreach (var eeg in wiom.EntranceExitGroups)
+                                {
+                                    <td>
+                                        @eeg.Entrance
+                                    </td>
+                                    <td>
+                                        @eeg.Exit
+                                    </td>
+                                }
+                            }
+                            else
+                            {
+                                <td colspan="2">No entrance/exit data available</td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3">No workers available</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+<script>
+    function ExportToExcel(type, fn, dl) {
+        // Clone the table and make it visible
+        var elt = document.getElementById('tbl_exporttable_to_xls').cloneNode(true);
+        elt.style.display = 'table';
+
+        // Convert the cloned table to an Excel workbook
+        var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+
+        // Export the workbook
+        return dl ?
+            XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+            XLSX.writeFile(wb, fn || ('1.' + (type || 'xlsx')));
+    }
+</script>

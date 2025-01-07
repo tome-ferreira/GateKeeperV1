@@ -1,17 +1,18 @@
 ﻿@model RegistCompanyViewModel
 
 @{
-    ViewBag.Title = "Regist new company";
+    Layout = "~/Views/Shared/_LayoutEmptySideBar.cshtml";
+    ViewBag.Title = "Criar empresa";
 }
 
 <div class="container">
     <div class="row">
-        <a class="btn btn-danger" asp-action="Index" asp-controller="Client">Cancel</a>
+        <a class="btn btn-danger" asp-action="Index" asp-controller="Client">Cancelar</a>
     </div>
     <form method="post" asp-action="RegistCompany" asp-controller="Company">
         <div class="row">
-            <div class="col-md-6">
-                <label asp-for="Name"></label>
+            <div class="col-md-12">
+                <label asp-for="Name">Nome</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
@@ -19,27 +20,26 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <label asp-for="Description"></label>
+                <label asp-for="Description">Descrição</label>
                 <input asp-for="Description" class="form-control"  />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <label asp-for="Password"></label>
                 <input asp-for="Password" class="form-control" type="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="Plan"></label>
+            <div class="col-md-12">
+                <label asp-for="Plan">Plano</label>
                 <select asp-for="Plan" class="form-control">
                     <option value="Free" >Free</option>
-                    <option value="Premium">Premium</option>
                     <option value="Enterprise">Enterprise</option>
                 </select>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Continue</button>
+        <button type="submit" class="btn btn-primary mt-3">Criar</button>
     </form>
 </div>

@@ -83,8 +83,28 @@ namespace GateKeeperV1.Controllers
             {
                 if (model.Plan == "Enterprise")
                 {
-                    TempData["RegistCompanyModel"] = JsonConvert.SerializeObject(model);
-                    return RedirectToAction("CostumizePlan", "Company");
+                    // Generate a random salt
+                    byte[] salt = GenerateSalt();
+
+                    // Hash the password with the salt
+                    byte[] hashedPassword = HashPassword(model.Password, salt);
+
+                    var user = await userManager.GetUserAsync(User);
+
+                    EnterpirseRequest request = new EnterpirseRequest()
+                    {
+                        UserId = user.Id,
+                        Name = model.Name,
+                        Description = model.Description,
+                        Password = Convert.ToBase64String(hashedPassword),
+                        Salt = Convert.ToBase64String(salt),
+                        CreationDate = DateTime.Now
+                    };
+
+                    await dbContext.EnterpirseRequests.AddAsync(request);
+                    await dbContext.SaveChangesAsync();
+
+                    return View("RequestMade");
                 }
 
 
@@ -110,32 +130,9 @@ namespace GateKeeperV1.Controllers
 
                     await dbContext.SaveChangesAsync();
 
-                    return View("CompanyReady", company.Id);
+                    return RedirectToAction("Index", "Dashboard", company.Id);
                 }
-                else if (model.Plan == "Premium")
-                {
-                    // Generate a random salt
-                    byte[] salt = GenerateSalt();
-
-                    // Hash the password with the salt
-                    byte[] hashedPassword = HashPassword(model.Password, salt);
-
-                    Company company = new Company(model.Name, model.Description, await GenerateUserName(model.Name), Convert.ToBase64String(hashedPassword), 
-                        Convert.ToBase64String(salt), DateTime.Now.AddYears(99), 3, 1500, 9999999, 3, true, 49.00, 539.00);
-                    await dbContext.Companies.AddAsync(company);
-
-                    var user = await userManager.GetUserAsync(User);
-
-                    int internalNumber = await functions.GenerateInternalNumber(company.Id);
-
-                    WorkerProfile workerProfile = new WorkerProfile(internalNumber, company.Id,"", "Admin", user.Id);
-
-                    await dbContext.WorkerProfiles.AddAsync(workerProfile);
-
-                    await dbContext.SaveChangesAsync();
-
-                    return View("CompanyReady", company.Id);
-                }
+                
 
             }
             return View("Error");

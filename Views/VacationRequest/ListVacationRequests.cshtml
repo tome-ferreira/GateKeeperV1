@@ -1,0 +1,47 @@
+﻿@model List<OffdayVacationRequest>
+@{
+    ViewBag.Title = "Pedidos de férias ou folgas";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div class="containner">
+    <h2>Pedidos de férias ou folgas</h2>
+    <table class="table" id="ajTable">
+        <thead>
+            <tr>
+                <th>Trabalhador</th>
+                <th>Começo</th>
+                <th>Fim</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var aj in Model)
+            {
+                <tr>
+                    <td>@aj.Worker.ApplicationUser.Name @aj.Worker.ApplicationUser.Surname</td>
+                    <td>@aj.Starts.ToString("dd/MM/yyyy")</td>
+                    <td>@aj.Ends.ToString("dd/MM/yyyy")</td>
+                    @if (aj.Status == "Aproved")
+                    {
+                        <td>Aprovada</td>
+                    }
+                    else if (aj.Status == "WaitingRevision")
+                    {
+                        <td>Espera revisão</td>
+                    }
+                    else if (aj.Status == "Recused")
+                    {
+                        <td>Recusada</td>
+                    }
+                    else
+                    {
+                        <td>@aj.Status</td>
+                    }
+                    <td><a class="btn btn-primary" asp-action="RequestDetails" asp-controller="VacationRequest" asp-route-Id="@aj.Id">Detalhes</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

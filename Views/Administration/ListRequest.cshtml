@@ -1,0 +1,40 @@
+﻿@model List<EnterpirseRequest>
+
+@{
+    ViewBag.Title = "Pedidos de plano Enterprise";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container">
+    <h1>Pedidos de plano Enterprise</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <td>
+                    Name
+                </td>
+                <td>
+                    Contacto
+                </td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var er in Model)
+            {
+                <tr>
+                    <td>
+                        @er.Name
+                    </td>
+                    <td>
+                        @er.User.Email
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" asp-controller="Administration" asp-action="ReviewRequest" asp-route-id="@er.Id">Rever pedido</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

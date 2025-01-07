@@ -29,12 +29,13 @@ namespace GateKeeperV1.Controllers
             this.userManager = userManager;
         }
 
-        private Bitmap GenerateQrCodeImage(Guid WorkerId, string CompanyId)
+        private Bitmap GenerateQrCodeImage(Guid WorkerId)
         {
             using (var qrGenerator = new QRCodeGenerator())
             {
-                
-                QRCodeData qrCodeData = qrGenerator.CreateQrCode(WorkerId.ToString(), QRCodeGenerator.ECCLevel.Q);
+                var link = "https://gatekeeper.xiscard.eu/Q/Index?WId=" + WorkerId.ToString();
+
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(link, QRCodeGenerator.ECCLevel.Q);
 
                 using (var qrCode = new QRCode(qrCodeData))
                 {
@@ -73,7 +74,7 @@ namespace GateKeeperV1.Controllers
 
 
             //Gerar código se não existir
-            var qrCodeImage = GenerateQrCodeImage(WorkerId, companyId); 
+            var qrCodeImage = GenerateQrCodeImage(WorkerId); 
             var qrCodeFilePath = Path.Combine(companyPath, fileName);
 
             byte[] imageBytes;

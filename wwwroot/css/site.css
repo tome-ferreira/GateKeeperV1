@@ -130,3 +130,10 @@ body {
 .important-black-text{
     color: #000 !important;
 }
+
+.backgroud-filter {
+    background-color: #003d32;
+    border-radius: 30px;
+    color: #FFF;
+    padding: 30px;
+}

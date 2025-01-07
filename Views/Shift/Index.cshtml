@@ -1,1 +1,59 @@
-﻿
+﻿@model List<Shift>
+@{
+    ViewBag.Title = "Turnos";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+
+
+    var dayTranslations = new Dictionary<DayOfWeek, string>
+    {
+        { DayOfWeek.Sunday, "Domingo" },
+        { DayOfWeek.Monday, "Segunda-feira" },
+        { DayOfWeek.Tuesday, "Terça-feira" },
+        { DayOfWeek.Wednesday, "Quarta-feira" },
+        { DayOfWeek.Thursday, "Quinta-feira" },
+        { DayOfWeek.Friday, "Sexta-feira" },
+        { DayOfWeek.Saturday, "Sábado" }
+    };
+
+}
+
+<div class="conatainer">
+    <div class="row">
+        <h1>Turnos</h1>
+    </div>
+    <div class="row">
+        <table class="table" id="shiftsTable"id="shiftsTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Horas</th>
+                    <th>Trabalhadores</th>
+                    <th>Líder</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td>
+                            @s.Name
+                        </td>
+                        <td>
+                            @s.Starts - @s.Ends
+                        </td>
+                        <td>
+                            @s.WorkerShifts.Count()
+                        </td>
+                        <td>
+                            @s.ShiftLeader.ApplicationUser.Name @s.ShiftLeader.ApplicationUser.Surname
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" asp-action="ShiftDetails" asp-controller="Shift" asp-route-id="@s.Id">Detalhes</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
