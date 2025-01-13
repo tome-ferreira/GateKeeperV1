@@ -9,9 +9,6 @@
         </div>
         <div class="col-md-5"></div>
         <div class="col-md-3">
-            <button onclick="ExportToExcel('xlsx')" class="btn btn-primary">
-                <i class="fas fa-download" style="margin-right: 5px;"></i> Exportar em Excel
-            </button>
         </div>
     </div>
 
@@ -38,10 +35,19 @@
                             {
                                 @foreach (var eeg in wiom.EntranceExitGroups)
                                 {
-                                    <td>
-                                        @eeg.Entrance
-                                    </td>
-                                    <td>
+                                    @if(eeg.Entrance == "Erro")
+                                    {
+                                        <td style="background-color: #E5A69E; color: black;">
+                                            @eeg.Entrance
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td style="background-color: #A0E9B9; color: black;">
+                                            @eeg.Entrance
+                                        </td>
+                                    }
+                                    <td style="background-color: #E5A69E; color: black;">
                                         @eeg.Exit
                                     </td>
                                 }
