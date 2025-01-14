@@ -67,6 +67,8 @@ namespace GateKeeperV1.Controllers
 
             model.NewstMovements = await dbContext.Movements
                 .Include(m => m.Shift)
+                .Include(m => m.Worker)
+                .ThenInclude(w => w.ApplicationUser)
                 .Where(m => m.Shift.CompanyId == Guid.Parse(companyId))
                 .Where(m => m.DateTime.Date == today.Date)
                 .OrderByDescending(m => m.DateTime) 

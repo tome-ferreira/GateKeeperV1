@@ -49,6 +49,12 @@ namespace GateKeeperV1.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMovementsTablePartial(DateTime date)
         {
+            if(date == DateTime.MinValue)
+            {
+                 date = DateTime.Now.Date;
+
+            }
+
             string? companyId = HttpContext.Session.GetString("companyId");
             if (string.IsNullOrEmpty(companyId))
             {
